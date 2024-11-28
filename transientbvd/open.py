@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 
 from scipy.optimize import minimize_scalar
 
-from utils import roots
+from .utils import roots
 
 
 def potential(

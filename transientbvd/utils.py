@@ -1,5 +1,7 @@
 from typing import Optional, List
 
+import sympy as sp
+
 
 def roots(
     rs: float,
