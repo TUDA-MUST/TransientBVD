@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "transientbvd"
+version = "0.1.0"
+description = "A Python library for transient response analysis and optimization using the Butterworth-Van Dyke (BVD) equivalent circuit model."
+authors = ["JHD <jan_helge.doersam@tu-darmstadt.de>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
