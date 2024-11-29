@@ -1,5 +1,7 @@
 from typing import Dict, Optional, List, Tuple
 
+from transientbvd.utils import resonance_frequency
+
 
 class Transducer:
     """
@@ -21,8 +23,6 @@ class Transducer:
         Parallel capacitance in farads.
     manufacturer : Optional[str], default=None
         The manufacturer of the transducer.
-    frequency : Optional[float], default=None
-        The operational frequency of the transducer in Hz.
     """
     def __init__(
         self,
@@ -31,8 +31,7 @@ class Transducer:
         ls: float,
         cs: float,
         c0: float,
-        manufacturer: Optional[str] = None,
-        frequency: Optional[float] = None,
+        manufacturer: Optional[str] = None
     ):
         self.name = name
         self.rs = rs
@@ -40,7 +39,7 @@ class Transducer:
         self.cs = cs
         self.c0 = c0
         self.manufacturer = manufacturer
-        self.frequency = frequency
+        self.frequency = resonance_frequency(rs=rs, ls=ls, cs=cs, c0=c0)
 
     def parameters(self) -> Tuple[float, float, float, float]:
         """
@@ -78,11 +77,11 @@ class Transducer:
 measured_transducers: Dict[str, Transducer] = {
     "SMBLTD45F40H": Transducer(
         name="SMBLTD45F40H", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12,
-        manufacturer="STEINER & MARTINS INC., Davenport, USA", frequency=40.000
+        manufacturer="STEINER & MARTINS INC., Davenport, USA"
     ),
     "MA40S4S": Transducer(
         name="MA40S4S", rs=6.43186339335e+002, ls=6.88719499245e-002, cs=2.30489066295e-010, c0=2.40188114400e-009,
-        manufacturer="Murata, Nagaokakyō, Japan", frequency=40.000
+        manufacturer="Murata, Nagaokakyō, Japan"
     ),
 }
 

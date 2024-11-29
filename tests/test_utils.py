@@ -1,6 +1,13 @@
 import unittest
 import random
+
+import numpy as np
+
 from transientbvd.utils import roots
+
+import unittest
+import random
+from transientbvd.utils import resonance_frequency
 
 
 class TestRootsMethod(unittest.TestCase):
@@ -74,6 +81,87 @@ class TestRootsMethod(unittest.TestCase):
 
             # Ensure all roots are complex numbers
             self.assertTrue(all(isinstance(root, complex) for root in result))
+
+
+class TestResonanceFrequencyMethod(unittest.TestCase):
+    def test_resonance_frequency_basic(self):
+        """Test resonance frequency with valid inductance and capacitance."""
+        ls = 10e-6  # Inductance in henries
+        cs = 1e-12  # Capacitance in farads
+
+        # Calculate resonance frequency
+        result = resonance_frequency(ls=ls, cs=cs)
+
+        # Expected resonance frequency
+        expected = 1 / (2 * np.pi * (ls * cs) ** 0.5)
+
+        # Assert the result is correct
+        self.assertAlmostEqual(result, expected, places=6)
+
+    def test_resonance_frequency_with_full_parameters(self):
+        """Test resonance frequency with all BVD parameters."""
+        rs = 24.764  # Series resistance in ohms
+        ls = 38.959e-3  # Inductance in henries
+        cs = 400.33e-12  # Capacitance in farads
+        c0 = 3970.1e-12  # Parallel capacitance in farads
+
+        # Calculate resonance frequency
+        result = resonance_frequency(rs=rs, ls=ls, cs=cs, c0=c0)
+
+        # Expected resonance frequency
+        expected = 1 / (2 * np.pi * (ls * cs) ** 0.5)
+
+        # Assert the result is correct
+        self.assertAlmostEqual(result, expected, places=6)
+
+    def test_invalid_parameters(self):
+        """Test that invalid parameters raise ValueError."""
+        ls = 10e-6  # Inductance in henries
+        cs = 1e-12  # Capacitance in farads
+
+        with self.assertRaises(ValueError):
+            resonance_frequency(ls=-ls, cs=cs)  # Negative ls
+
+        with self.assertRaises(ValueError):
+            resonance_frequency(ls=ls, cs=0)  # Zero cs
+
+        rs = 24.764  # Series resistance in ohms
+        c0 = 3970.1e-12  # Parallel capacitance in farads
+
+        with self.assertRaises(ValueError):
+            resonance_frequency(rs=rs, ls=ls, cs=cs, c0=-c0)  # Negative c0
+
+    def test_randomized_parameters(self):
+        """Test resonance frequency with randomized positive non-zero values."""
+        for _ in range(100):  # Run 100 randomized tests
+            ls = random.uniform(1e-6, 1e-3)
+            cs = random.uniform(1e-12, 1e-6)
+
+            # Calculate resonance frequency
+            result = resonance_frequency(ls=ls, cs=cs)
+
+            # Expected resonance frequency
+            expected = 1 / (2 * np.pi * (ls * cs) ** 0.5)
+
+            # Assert the result is correct
+            self.assertAlmostEqual(result, expected, places=6)
+
+    def test_randomized_full_parameters(self):
+        """Test resonance frequency with randomized full BVD parameters."""
+        for _ in range(100):  # Run 100 randomized tests
+            rs = random.uniform(1, 100)
+            ls = random.uniform(1e-6, 1e-3)
+            cs = random.uniform(1e-12, 1e-6)
+            c0 = random.uniform(1e-12, 1e-6)
+
+            # Calculate resonance frequency
+            result = resonance_frequency(rs=rs, ls=ls, cs=cs, c0=c0)
+
+            # Expected resonance frequency
+            expected = 1 / (2 * np.pi * (ls * cs) ** 0.5)
+
+            # Assert the result is correct
+            self.assertAlmostEqual(result, expected, places=6)
 
 
 if __name__ == "__main__":
