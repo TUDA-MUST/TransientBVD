@@ -2,7 +2,8 @@ from typing import Optional, List
 from typing import Union, overload
 
 import numpy as np
-import sympy as sp
+from sympy import solve, symbols
+from sympy.abc import x
 
 
 @overload
@@ -79,6 +80,72 @@ def resonance_frequency(
 
     return resonance_freq
 
+
+from mpmath import mp
+from typing import List, Optional
+
+def roots_with_mpmath(
+    rs: float,
+    ls: float,
+    cs: float,
+    c0: float,
+    rp: Optional[float] = None,
+    precision: int = 50
+) -> List[complex]:
+    r"""
+    Calculate the roots of the characteristic polynomial using mpmath for high precision.
+
+    Parameters
+    ----------
+    rs : float
+        Series resistance in ohms.
+    ls : float
+        Inductance in henries.
+    cs : float
+        Series capacitance in farads.
+    c0 : float
+        Parallel capacitance in farads.
+    rp : Optional[float]
+        Parallel resistance in ohms. If None, considers the open circuit.
+    precision : int, default=50
+        Number of significant digits for the root calculations.
+
+    Returns
+    -------
+    List[complex]
+        Roots of the characteristic polynomial.
+    """
+    # Set precision
+    mp.dps = precision
+
+    # Validate input parameters
+    if rs <= 0 or ls <= 0 or cs <= 0 or c0 <= 0:
+        raise ValueError("All BVD model parameters (rs, ls, cs, c0) must be positive.")
+    if rp is not None and rp <= 0:
+        raise ValueError("If provided, rp must be a positive value.")
+
+    # Calculate polynomial coefficients
+    if rp is not None:
+        a2 = mp.mpf(rs / ls) + mp.mpf(1 / (rp * c0))
+        a1 = (
+            mp.mpf(rs / (rp * ls * c0))
+            + mp.mpf(1 / (cs * ls))
+            + mp.mpf(1 / (ls * c0))
+        )
+        a0 = mp.mpf(1 / (cs * rp * c0 * ls))
+    else:
+        a2 = mp.mpf(rs / ls)
+        a1 = mp.mpf(rs / (ls * c0)) + mp.mpf(1 / (cs * ls)) + mp.mpf(1 / (ls * c0))
+        a0 = mp.mpf(1 / (cs * ls * c0))
+
+    # Polynomial coefficients in decreasing order
+    coefficients = [1, a2, a1, a0]
+
+    # Calculate roots using mpmath.polyroots
+    roots = mp.polyroots(coefficients, maxsteps=100000)
+
+    return [complex(root) for root in roots]
+
 def roots(
     rs: float,
     ls: float,
@@ -89,31 +156,6 @@ def roots(
     r"""
     Calculate the roots of the characteristic polynomial for transient response
     in a system modeled by the Butterworth-Van Dyke (BVD) equivalent circuit.
-
-    The transient voltage behavior is described by the eigenvalues of the
-    characteristic polynomial. The general solution for the transient voltage is:
-
-    .. math::
-
-        u(t) = A e^{\lambda_1 t} + B e^{\lambda_2 t} + C e^{\lambda_3 t},
-
-    where :math:`A`, :math:`B`, and :math:`C` are real coefficients determined
-    by initial conditions. These coefficients scale the contributions from
-    each eigenvalue.
-
-    If the system has complex eigenvalues, the exponential terms are converted
-    into trigonometric functions. This yields the solution:
-
-    .. math::
-
-        u(t) = c_1 e^{\lambda_1 t} + e^{\operatorname{Re}(\lambda_2) t}
-               \left[c_2 \cos{(\operatorname{Im}(\lambda_3) t)}
-               + c_3 \sin{(\operatorname{Im}(\lambda_3) t)}\right],
-
-    where :math:`c_1`, :math:`c_2`, and :math:`c_3` are constants derived
-    from the initial conditions, and :math:`\operatorname{Re}` and
-    :math:`\operatorname{Im}` denote the real and imaginary parts of
-    the eigenvalues, respectively.
 
     Parameters
     ----------
@@ -133,13 +175,6 @@ def roots(
     -------
     List[complex]
         Roots of the characteristic polynomial.
-
-    Notes
-    -----
-    The calculation assumes the system is modeled accurately by the BVD equivalent
-    circuit. The transient response is governed by the relationship between
-    resistive, capacitive, and inductive components, and the eigenvalues of the
-    polynomial define the system's behavior over time.
     """
     # Validate input parameters
     if rs <= 0 or ls <= 0 or cs <= 0 or c0 <= 0:
@@ -147,23 +182,57 @@ def roots(
     if rp is not None and rp <= 0:
         raise ValueError("If provided, rp must be a positive value.")
 
-    # Define the symbolic variable
-    λ = sp.symbols('λ', real=False)
-
     # Calculate the coefficients of the characteristic polynomial
     if rp is not None:  # With optional parallel resistance
-        c0 = rs / ls + 1 / (rp * c0)
-        c1 = rs / (ls * c0 * rp) + 1 / (cs * ls) + 1 / (c0 * ls)
-        c2 = 1 / (cs * rp * c0 * ls)
+        a2 = rs / ls + 1 / (rp * c0)
+        a1 = rs / (rp * ls * c0) + 1 / (cs * ls) + 1 / (ls * c0)
+        a0 = 1 / (cs * rp * ls * c0)
     else:  # Without parallel resistance
-        c0 = rs / ls
-        c1 = rs / (ls * c0) + 1 / (cs * ls) + 1 / (c0 * ls)
-        c2 = 1 / (cs * c0 * ls)
+        a2 = rs / ls
+        a1 = rs / (ls * c0) + 1 / (cs * ls) + 1 / (ls * c0)
+        a0 = 1 / (cs * ls * c0)
+
+    # Debug: Print coefficients
+    print(f"Coefficients: a2={a2}, a1={a1}, a0={a0}")
 
     # Construct the characteristic polynomial
-    characteristic_poly = λ**3 + c0 * λ**2 + c1 * λ + c2
+    x = symbols('x')
+    eq = x**3 + a2 * x**2 + a1 * x + a0
 
     # Solve for the roots
-    p_roots = sp.solvers.solve(characteristic_poly, λ)
+    p_roots = solve(eq, x)
 
-    return [complex(root) for root in p_roots]  # Ensure all roots are returned as complex numbers
+    # Debug: Print roots
+    print(f"Calculated roots: {p_roots}")
+
+    return [complex(root.evalf()) for root in p_roots]  # Convert roots to complex numbers
+
+
+if __name__ == "__main__":
+    # Example circuit parameters
+    rs = 24.764  # Series resistance in ohms
+    ls = 38.959e-3  # Inductance in henries
+    cs = 400.33e-12  # Series capacitance in farads
+    c0 = 3970.1e-12  # Parallel capacitance in farads
+    rp = 2000  # Parallel resistance in ohms
+    precision = 100  # Precision for mpmath
+
+    # Calculate roots using the SymPy-based method
+    sympy_roots = roots(rs, ls, cs, c0, rp)
+    print(f"SymPy roots:")
+    for root in sympy_roots:
+        print(f"  {root}")
+
+    # Calculate roots using the mpmath-based method
+    mpmath_roots = roots_with_mpmath(rs, ls, cs, c0, rp, precision=precision)
+    print(f"\nmpmath roots (precision={precision}):")
+    for root in mpmath_roots:
+        print(f"  {root}")
+
+    # Compare the two sets of roots
+    print("\nComparison:")
+    for sympy_root, mpmath_root in zip(sympy_roots, mpmath_roots):
+        real_diff = abs(sympy_root.real - mpmath_root.real)
+        imag_diff = abs(sympy_root.imag - mpmath_root.imag)
+        print(f"SymPy: {sympy_root}, mpmath: {mpmath_root}")
+        print(f"  Real difference: {real_diff:.10e}, Imaginary difference: {imag_diff:.10e}")
