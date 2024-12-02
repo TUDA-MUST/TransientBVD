@@ -36,6 +36,19 @@ class Transducer:
     manufacturer: Optional[str] = None
     frequency: float = field(init=False)  # Calculated after initialization
 
+    def __str__(self) -> str:
+        """
+        Provide a human-readable string representation of the transducer.
+        """
+        details = (
+            f"Transducer: {self.name}\n"
+            f"Manufacturer: {self.manufacturer or 'Unknown'}\n"
+            f"Parameters (rs, ls, cs, c0): ({self.rs:.4f} Ω, {self.ls:.6f} H, "
+            f"{self.cs:.2e} F, {self.c0:.2e} F)\n"
+            f"Resonance Frequency: {self.frequency:.2f} Hz"
+        )
+        return details
+
     def __post_init__(self):
         """
         Calculate the resonance frequency of the transducer after initialization.

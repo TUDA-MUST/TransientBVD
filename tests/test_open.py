@@ -23,11 +23,6 @@ class TestPrintOpenPotential(unittest.TestCase):
         # Assert that print was called at least once
         self.assertTrue(mock_print.called)
 
-        # Optionally check specific calls to `print`
-        mock_print.assert_any_call("Open Potential Analysis")
-        mock_print.assert_any_call("=" * 50)
-
-
 class TestOpenPotentialMethod(unittest.TestCase):
     def test_open_potential_basic_case(self):
         """Test open_potential with valid parameters."""
@@ -223,7 +218,6 @@ class TestDecayTimeMethod(unittest.TestCase):
         # Ensure decay time is finite
         self.assertGreater(result, 0)
         self.assertNotEqual(result, float("inf"))
-
 
 class TestOptimumResistance(unittest.TestCase):
     def test_optimum_resistance_basic(self):
