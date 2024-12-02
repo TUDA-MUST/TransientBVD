@@ -140,12 +140,12 @@ def predefined_transducer(name: str) -> Transducer:
 
 def predefined_transducers() -> List[str]:
     """
-    Get a list of all predefined transducer names.
+    Get a list of all predefined transducer names, sorted alphabetically.
 
     Returns
     -------
     List[str]
-        A list of available transducer names.
+        A sorted list of available transducer names.
     """
     _load_transducers()  # Ensure transducers are loaded
-    return list(_measured_transducers.keys())
+    return sorted(_measured_transducers.keys())
