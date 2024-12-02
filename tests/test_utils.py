@@ -83,7 +83,8 @@ class TestRootsMethod(unittest.TestCase):
             self.assertTrue(all(isinstance(root, complex) for root in result))
 
     def test_fixed_roots_with_rp(self):
-        """Test roots calculation for specific parameters with rp = 2 kΩ."""
+        """Test roots calculation for specific parameters with rp = 2 kΩ for two scenarios."""
+        # Case 1
         rs = 24.764  # Series resistance in ohms
         ls = 38.959e-3  # Inductance in henries
         cs = 400.33e-12  # Series capacitance in farads
@@ -91,20 +92,45 @@ class TestRootsMethod(unittest.TestCase):
         rp = 2000  # Parallel resistance in ohms
 
         # Calculate roots
-        result = roots(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
+        result_case_1 = roots(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
 
-        # Expected roots (rounded values from the problem statement)
-        expected_roots = [
-            -112355.43,
-            -5461.02 - 263082.45j,
-            -5461.02 + 263082.45j
+        # Expected roots for Case 1
+        expected_roots_case_1 = [
+            -116250.55048491334 + 0j,
+            -5163.252084413833 - 263505.9617259056j,
+            -5163.252084413833 + 263505.9617259056j,
         ]
 
         # Assert that the number of roots is 3
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result_case_1), 3)
 
         # Assert that each root matches the expected root within a small tolerance
-        for calc_root, expected_root in zip(result, expected_roots):
+        for calc_root, expected_root in zip(result_case_1, expected_roots_case_1):
+            self.assertAlmostEqual(calc_root.real, expected_root.real, delta=1e-2)
+            self.assertAlmostEqual(calc_root.imag, expected_root.imag, delta=1e-2)
+
+        # Case 2
+        rs = 21.05  # Series resistance in ohms
+        ls = 35.15e-3  # Inductance in henries
+        cs = 448.62e-12  # Series capacitance in farads
+        c0 = 4075.69e-12  # Parallel capacitance in farads
+        rp = 2000  # Parallel resistance in ohms
+
+        # Calculate roots
+        result_case_2 = roots(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
+
+        # Expected roots for Case 2
+        expected_roots_case_2 = [
+            -112355.42784550134 + 0j,
+            -5461.024051180828 - 263082.4484804597j,
+            -5461.024051180828 + 263082.4484804597j,
+        ]
+
+        # Assert that the number of roots is 3
+        self.assertEqual(len(result_case_2), 3)
+
+        # Assert that each root matches the expected root within a small tolerance
+        for calc_root, expected_root in zip(result_case_2, expected_roots_case_2):
             self.assertAlmostEqual(calc_root.real, expected_root.real, delta=1e-2)
             self.assertAlmostEqual(calc_root.imag, expected_root.imag, delta=1e-2)
 

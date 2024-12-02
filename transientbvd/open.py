@@ -311,3 +311,27 @@ if __name__ == "__main__":
     print(f"Decay time with parallel 500 resistance: {t2:.6f} s")
     t3 = decay_time(rs, ls, cs, c0, rp=900)
     print(f"Decay time with parallel 1000 resistance: {t3:.6f} s")
+
+    #c0=3700e-12
+    #rs= 21.05
+    #ls = 35.15e-3
+    #cs = 448.62e-12
+    #c0 = 4075.69e-12
+
+    from sympy import solve, im, re
+    from sympy.abc import x
+    from utils import roots
+    # Calculation of the roots of the characteristic polynom of the DGL, DGL is calculated by hand
+    def calc_roots(res):
+        ko = [rs / ls + 1 / (res * c0), (rs / (ls * c0 * res) + 1 / (cs * ls) + 1 / (c0 * ls)),
+              1 / (cs * res * c0 * ls)]
+        eq = x ** 3 + ko[0] * x ** 2 + ko[1] * x + ko[2]
+        result = solve(eq, x)
+        return result
+
+    print(f"OLD: Roots with 500 resistance: {calc_roots(500)}")
+    print(f"NEW: Roots with 500 resistance: {roots(rs, ls, cs, c0, rp=500)}")
+    print(f"OLD: Roots with 900 resistance: {calc_roots(900)}")
+    print(f"NEW: Roots with 900 resistance: {roots(rs, ls, cs, c0, rp=900)}")
+    print(f"OLD: Roots with 2000 resistance: {calc_roots(2000)}")
+    print(f"NEW: Roots with 2000 resistance: {roots(rs, ls, cs, c0, rp=2000)}")
