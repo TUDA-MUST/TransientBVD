@@ -1,13 +1,10 @@
-import unittest
 import random
+import unittest
 
 import numpy as np
 
-from transientbvd.utils import roots
-
-import unittest
-import random
 from transientbvd.utils import resonance_frequency
+from transientbvd.utils import roots
 
 
 class TestRootsMethod(unittest.TestCase):

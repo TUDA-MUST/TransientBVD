@@ -1,14 +1,70 @@
 import logging
 from typing import Tuple, Optional
-
 from scipy.optimize import minimize_scalar
 
 from .utils import roots
 
-logging.basicConfig(level=logging.INFO)
+def print_open_potential(
+    rs: float,
+    ls: float,
+    cs: float,
+    c0: float,
+    resistance_range: Tuple[float, float] = (10, 5000)
+) -> None:
+    """
+    Pretty print the results of open_potential, including decay times and speed improvement.
+
+    Parameters
+    ----------
+    rs : float
+        Series resistance in ohms (BVD model parameter).
+    ls : float
+        Inductance in henries (BVD model parameter).
+    cs : float
+        Series capacitance in farads (BVD model parameter).
+    c0 : float
+        Parallel capacitance in farads (BVD model parameter).
+    resistance_range : Tuple[float, float], optional
+        A tuple representing the lower and upper bounds of resistances (in ohms) to evaluate
+        for damping optimization. Default is (10, 5000).
+    """
+    # Evaluate the open_potential
+    optimal_resistance, tau_with_rp, delta_time, percentage_improvement = open_potential(
+        rs, ls, cs, c0, resistance_range
+    )
+
+    # Calculate decay times without using rp
+    tau_no_rp = 2 * ls / rs
+    two_tau_no_rp = 2 * tau_no_rp
+
+    # Calculate 2τ for rp
+    two_tau_with_rp = 2 * tau_with_rp
+
+    # Calculate speed improvement factor
+    speed_improvement = tau_no_rp / tau_with_rp if tau_with_rp > 0 else float("inf")
+
+    # Pretty print the results
+    print("=" * 50)
+    print("Open Potential Analysis")
+    print("=" * 50)
+    print(f"Series Resistance (Rs): {rs:.2f} Ω")
+    print(f"Inductance (Ls): {ls:.6e} H")
+    print(f"Series Capacitance (Cs): {cs:.6e} F")
+    print(f"Parallel Capacitance (C0): {c0:.6e} F")
+    print(f"Resistance Range: {resistance_range[0]} Ω to {resistance_range[1]} Ω")
+    print("-" * 50)
+    print(f"Optimal Parallel Resistance (Rp): {optimal_resistance:.2f} Ω")
+    print(f"Decay Time (τ) without Rp: {tau_no_rp:.6f} s ({tau_no_rp * 1e3:.2f} ms)")
+    print(f"Decay Time (τ) with Rp: {tau_with_rp:.6f} s ({tau_with_rp * 1e3:.2f} ms)")
+    print(f"2τ without Rp: {two_tau_no_rp:.6f} s ({two_tau_no_rp * 1e3:.2f} ms)")
+    print(f"2τ with Rp: {two_tau_with_rp:.6f} s ({two_tau_with_rp * 1e3:.2f} ms)")
+    print(f"Absolute Time Improvement: {delta_time:.6f} s ({delta_time * 1e3:.2f} ms)")
+    print(f"Percentage Time Improvement: {percentage_improvement:.2f}%")
+    print(f"Speed Improvement Factor: {speed_improvement:.2f}x")
+    print("=" * 50)
 
 
-def potential(
+def open_potential(
     rs: float,
     ls: float,
     cs: float,
@@ -81,7 +137,7 @@ def potential(
     return optimal_resistance, tau_with_rp, delta_time, percentage_improvement
 
 
-def decay_time(
+def tau_decay(
     rs: float,
     ls: float,
     cs: float,
@@ -89,7 +145,7 @@ def decay_time(
     rp: Optional[float] = None
 ) -> float:
     """
-    Calculate the decay time for a given parallel resistance (rp) or without it.
+    Calculate the decay time (τ) for a given parallel resistance (rp) or without it.
 
     Parameters
     ----------
@@ -107,7 +163,7 @@ def decay_time(
     Returns
     -------
     float
-        Decay time in seconds.
+        Decay time (τ) in seconds.
 
     Raises
     ------
@@ -137,6 +193,49 @@ def decay_time(
     second_root = calculated_roots[1]  # Replace λ2 with a more generic name
     decay_rate = abs(second_root.real)
     return 1 / decay_rate if decay_rate > 0 else float("inf")
+
+
+def two_tau_decay(
+    rs: float,
+    ls: float,
+    cs: float,
+    c0: float,
+    rp: Optional[float] = None
+) -> float:
+    """
+    Calculate twice the decay time (2τ) for a given parallel resistance (rp) or without it.
+
+    Parameters
+    ----------
+    rs : float
+        Series resistance in ohms (BVD model parameter).
+    ls : float
+        Inductance in henries (BVD model parameter).
+    cs : float
+        Series capacitance in farads (BVD model parameter).
+    c0 : float
+        Parallel capacitance in farads (BVD model parameter).
+    rp : Optional[float], default=None
+        Parallel resistance in ohms. If None, decay time is calculated without rp.
+
+    Returns
+    -------
+    float
+        Twice the decay time (2τ) in seconds.
+
+    Raises
+    ------
+    ValueError
+        If any BVD model parameter (rs, ls, cs, c0) is not positive or if rp is non-positive.
+
+    Notes
+    -----
+    - When `rp` is not provided, the decay time is calculated using the formula:
+      2τ = 4 * ls / rs (approximating an open circuit).
+    - When `rp` is provided, the decay time is determined using the eigenvalues of
+      the characteristic polynomial.
+    """
+    return 2 * tau_decay(rs, ls, cs, c0, rp)
 
 
 def optimum_resistance(
@@ -187,7 +286,7 @@ def optimum_resistance(
         """
         Wrapper for decay_time to match the signature for optimization.
         """
-        return decay_time(rs, ls, cs, c0, rp=rp)
+        return tau_decay(rs, ls, cs, c0, rp=rp)
 
     # Perform numerical optimization to find the resistance that minimizes decay time
     result = minimize_scalar(
@@ -204,11 +303,11 @@ def optimum_resistance(
     lower_bound, upper_bound = resistance_range
     tolerance = 0.01 * (upper_bound - lower_bound)  # 1% of the range
     if abs(optimal_resistance - lower_bound) < tolerance:
-        logging.info(
+        logging.warning(
             f"Hint: The optimal resistance ({optimal_resistance:.2f} ohms) is near the lower bound of the range. "
             f"Consider reducing the lower bound.")
     elif abs(optimal_resistance - upper_bound) < tolerance:
-        logging.info(
+        logging.warning(
             f"Hint: The optimal resistance ({optimal_resistance:.2f} ohms) is near the upper bound of the range. "
             f"Consider increasing the upper bound.")
 
@@ -305,11 +404,7 @@ if __name__ == "__main__":
     ls = 38.959e-3  # Inductance in henries
     cs = 400.33e-12  # Series capacitance in farads
     c0 = 3970.1e-12  # Parallel capacitance in farads
-    t = decay_time(rs, ls, cs, c0)
-    print(f"Decay time without parallel resistance: {t:.6f} s")
-    t2 = decay_time(rs, ls, cs, c0, rp=500)
-    print(f"Decay time with parallel 500 resistance: {t2:.6f} s")
-    t3 = decay_time(rs, ls, cs, c0, rp=900)
-    print(f"Decay time with parallel 1000 resistance: {t3:.6f} s")
+
+    print_open_potential(rs, ls, cs, c0)
 
 
