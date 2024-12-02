@@ -1,15 +1,17 @@
-from typing import Dict, Optional, List, Tuple
+import json
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional
 
-from transientbvd.utils import resonance_frequency
+from .utils import resonance_frequency
 
 
+@dataclass
 class Transducer:
     """
-    A class representing a transducer with predefined parameters for quick testing.
-    All measurements are in SI units and done with a network analyzer
-    (Vector Network Analyzer E5061B, Keysight, Santa Rosa, CA, USA).
+    Represents a transducer with predefined parameters for testing or simulation.
 
-    Parameters
+    Attributes
     ----------
     name : str
         The name of the transducer.
@@ -21,109 +23,116 @@ class Transducer:
         Series capacitance in farads.
     c0 : float
         Parallel capacitance in farads.
-    manufacturer : Optional[str], default=None
-        The manufacturer of the transducer.
+    manufacturer : Optional[str]
+        Manufacturer information for the transducer.
+    frequency : float
+        Resonance frequency of the transducer, calculated upon initialization.
     """
-    def __init__(
-        self,
-        name: str,
-        rs: float,
-        ls: float,
-        cs: float,
-        c0: float,
-        manufacturer: Optional[str] = None
-    ):
-        self.name = name
-        self.rs = rs
-        self.ls = ls
-        self.cs = cs
-        self.c0 = c0
-        self.manufacturer = manufacturer
-        self.frequency = resonance_frequency(rs=rs, ls=ls, cs=cs, c0=c0)
+    name: str
+    rs: float
+    ls: float
+    cs: float
+    c0: float
+    manufacturer: Optional[str] = None
+    frequency: float = field(init=False)  # Calculated after initialization
 
-    def parameters(self) -> Tuple[float, float, float, float]:
+    def __post_init__(self):
         """
-        Retrieve the core parameters of the transducer.
+        Calculate the resonance frequency of the transducer after initialization.
+        This ensures the `frequency` attribute is always available.
+        """
+        self.frequency = resonance_frequency(self.rs, self.ls, self.cs, self.c0)
+
+    def parameters(self) -> tuple:
+        """
+        Retrieve the core electrical parameters of the transducer.
 
         Returns
         -------
-        Tuple[float, float, float, float]
-            The parameters (rs, ls, cs, c0) in correct order.
+        tuple
+            A tuple of (rs, ls, cs, c0) representing the transducer's electrical parameters.
         """
         return self.rs, self.ls, self.cs, self.c0
 
-    def __repr__(self):
-        info = (
-            f"Transducer(name='{self.name}', rs={self.rs}, ls={self.ls}, "
-            f"cs={self.cs}, c0={self.c0}"
-        )
-        if self.manufacturer:
-            info += f", manufacturer='{self.manufacturer}'"
-        if self.frequency:
-            info += f", frequency={self.frequency} Hz"
-        info += ")"
-        return info
 
-    def __str__(self):
-        info = f"Transducer '{self.name}'"
-        if self.manufacturer:
-            info += f" by {self.manufacturer}"
-        if self.frequency:
-            info += f" at {self.frequency} Hz"
-        return info
+def load_transducers(json_file: str) -> Dict[str, Transducer]:
+    """
+    Load transducer data from a JSON file and create Transducer objects.
+
+    Parameters
+    ----------
+    json_file : str
+        Path to the JSON file containing transducer data.
+
+    Returns
+    -------
+    Dict[str, Transducer]
+        A dictionary of Transducer objects, keyed by their names.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified JSON file does not exist.
+    JSONDecodeError
+        If the JSON file is malformed.
+    """
+    json_path = Path(json_file)
+    with json_path.open("r", encoding="utf-8") as file:
+        data = json.load(file)  # Load data from JSON file
+    # Create Transducer objects from loaded data
+    return {name: Transducer(**params) for name, params in data.items()}
 
 
-# Dictionary of pre-measured transducers
-measured_transducers: Dict[str, Transducer] = {
-    "SMBLTD45F40H": Transducer(
-        name="SMBLTD45F40H", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12,
-        manufacturer="STEINER & MARTINS INC., Davenport, USA"
-    ),
-    "MA40S4S": Transducer(
-        name="MA40S4S", rs=6.43186339335e+002, ls=6.88719499245e-002, cs=2.30489066295e-010, c0=2.40188114400e-009,
-        manufacturer="Murata, Nagaokakyō, Japan"
-    ),
-}
+# Path to the JSON file containing pre-measured transducers
+_json_file_path = Path(__file__).parent / "data" / "transducers.json"
+
+# Internal dictionary for managing measured transducers
+_measured_transducers: Optional[Dict[str, Transducer]] = None
+
+
+def _load_transducers():
+    """
+    Lazily load the transducer data into `_measured_transducers` if not already loaded.
+    """
+    global _measured_transducers
+    if _measured_transducers is None:
+        _measured_transducers = load_transducers(str(_json_file_path))
 
 
 def predefined_transducer(name: str) -> Transducer:
     """
-    Retrieve a predefined transducer by name.
+    Retrieve a predefined transducer by its name.
 
     Parameters
     ----------
     name : str
-        The name of the transducer.
+        Name of the transducer to retrieve.
 
     Returns
     -------
     Transducer
-        The matching Transducer object.
+        The Transducer object corresponding to the given name.
 
     Raises
     ------
     ValueError
-        If the transducer name is not found in the predefined list.
-
-    Notes
-    -----
-    Transducers are retrieved from a predefined list of measured transducer parameters.
+        If the specified transducer name does not exist.
     """
-    if name not in measured_transducers:
-        available_names = ", ".join(measured_transducers.keys())
-        raise ValueError(
-            f"Transducer '{name}' not found. Available transducers: {available_names}"
-        )
-    return measured_transducers[name]
+    _load_transducers()  # Ensure transducers are loaded
+    if name not in _measured_transducers:
+        available = ", ".join(_measured_transducers.keys())
+        raise ValueError(f"Transducer '{name}' not found. Available transducers: {available}")
+    return _measured_transducers[name]
 
 
 def predefined_transducers() -> List[str]:
     """
-    List the names of all predefined transducers.
+    Get a list of all predefined transducer names.
 
     Returns
     -------
     List[str]
-        A list of transducer names.
+        A list of available transducer names.
     """
-    return list(measured_transducers.keys())
+    _load_transducers()  # Ensure transducers are loaded
+    return list(_measured_transducers.keys())

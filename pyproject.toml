@@ -26,6 +26,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 
+include = ["transientbvd/data/transducers.json"]
+
 [tool.poetry.dependencies]
 python = "^3.11"
 sympy = "^1.13.3"

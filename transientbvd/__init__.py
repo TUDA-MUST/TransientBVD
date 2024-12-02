@@ -1,12 +1,17 @@
-# __init__.py
-
-# Import submodules
-from . import open
-
-# Optionally import specific methods or classes directly
+# Import functions and classes from individual files
 from .open import potential, decay_time, optimum_resistance
-# from .closed import transient_voltage_closed
+from .transducer import predefined_transducer, predefined_transducers, Transducer, load_transducers
+from .utils import roots, resonance_frequency
 
-# Import rest of methods directly
-from .transducer import predefined_transducer, predefined_transducers, Transducer
-from .utils import roots
+# Define the public API
+__all__ = [
+    "potential",
+    "decay_time",
+    "optimum_resistance",
+    "predefined_transducer",
+    "predefined_transducers",
+    "Transducer",
+    "load_transducers",
+    "roots",
+    "resonance_frequency",
+]

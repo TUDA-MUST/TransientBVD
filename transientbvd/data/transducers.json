@@ -1,0 +1,50 @@
+{
+    "SMBLTD45F40H_1": {
+        "name": "SMBLTD45F40H_1",
+        "rs": 21.05,
+        "ls": 0.03515,
+        "cs": 4.4862e-10,
+        "c0": 4.07569e-9,
+        "manufacturer": "STEINER & MARTINS INC., Davenport, USA"
+    },
+    "SMBLTD45F40H_2": {
+        "name": "SMBLTD45F40H_2",
+        "rs": 24.764,
+        "ls": 0.038959,
+        "cs": 4.0033e-10,
+        "c0": 3.9701e-9,
+        "manufacturer": "STEINER & MARTINS INC., Davenport, USA"
+    },
+    "MA40S4S": {
+        "name": "MA40S4S",
+        "rs": 643.186339335,
+        "ls": 0.0688719499245,
+        "cs": 2.30489066295e-10,
+        "c0": 2.401881144e-9,
+        "manufacturer": "Murata, Nagaokakyō, Japan"
+    },
+    "GB-4540-4SH": {
+        "name": "GB-4540-4SH",
+        "rs": 17.2,
+        "ls": 0.03252,
+        "cs": 4.641e-10,
+        "c0": 3.397e-9,
+        "manufacturer": "Granbo Ultrasonic, Shenzhen, China"
+    },
+    "Skymen-60W": {
+        "name": "Skymen-60W",
+        "rs": 7.115,
+        "ls": 0.02558,
+        "cs": 6.177e-10,
+        "c0": 4.422e-9,
+        "manufacturer": "Skymen, Shenzhen, China"
+    },
+    "SMBLTD45F28H_28kHz": {
+        "name": "SMBLTD45F28H_28kHz",
+        "rs": 20.07,
+        "ls": 0.07247,
+        "cs": 4.484e-10,
+        "c0": 3.012e-9,
+        "manufacturer": "STEINER & MARTINS INC., Davenport, USA"
+    }
+}
