@@ -1,5 +1,7 @@
-# basic_open_potential_example.py
+# basic_example.py
 from transientbvd import print_open_potential
+from transientbvd.closed import print_closed_potential
+
 
 def main():
     # Define the BVD model parameters
@@ -11,6 +13,9 @@ def main():
 
     # Use print_open_potential to display analysis
     print_open_potential(rs, ls, cs, c0, resistance_range)
+
+    # use a boost voltage of 20V and a continuous wave voltage of 10V
+    print_closed_potential(rs, ls, cs, c0, ucw=10.0, ub=20.0)
 
 if __name__ == "__main__":
     main()
