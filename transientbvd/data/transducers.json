@@ -46,5 +46,22 @@
         "cs": 4.484e-10,
         "c0": 3.012e-9,
         "manufacturer": "STEINER & MARTINS INC., Davenport, USA"
+    },
+    "Custom": {
+        "name": "Custom",
+        "rs": 3.50,
+        "ls": 0.029,
+        "cs": 3.39e-9,
+        "c0": 1.2e-8,
+        "manufacturer": "Inoson, St. Ingbert, DE"
+    },
+    "8AF200184": {
+        "name": "8AF200184",
+        "rs": 7.12,
+        "ls": 0.02558,
+        "cs": 6.1774e-10,
+        "c0": 4.42179e-9,
+        "manufacturer": "SKYMEN, Shenzhen, CN"
     }
 }
+
