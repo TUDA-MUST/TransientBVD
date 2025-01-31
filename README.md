@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![DOI](https://img.shields.io/badge/DOI-10.1234%2Fexample-blue.svg?style=flat-square)](https://doi.org/10.1234/example)
 
-**TransientBVD** is a Python library for analyzing and optimizing the transient response of ultrasound transducers (or other resonant systems) modeled by the Butterworth-Van Dyke (BVD) equivalent circuit. It implements advanced methods for both open-circuit (resistive damping) and closed-circuit (voltage overboost) strategies, significantly reducing ringing times while preserving performance.
+**TransientBVD** is a Python library for analyzing and optimizing the transient response of ultrasound transducers (or other resonant systems) modeled by the Butterworth-Van Dyke (BVD) equivalent circuit. It implements advanced methods for both open-circuit (resistive damping) and closed-circuit (voltage overboost) strategies, significantly reducing transient response times.
 
 ## Features
 
