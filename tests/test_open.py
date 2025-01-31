@@ -3,7 +3,7 @@ import random
 import unittest
 from unittest.mock import patch
 
-from transientbvd import tau_decay, two_tau_decay, optimum_resistance, open_potential, print_open_potential
+from transientbvd import open_tau, open_two_tau, optimum_resistance, open_potential, print_open_potential
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -92,7 +92,7 @@ class TestOpenPotentialMethod(unittest.TestCase):
 
 
 class TestDecayTimeMethod(unittest.TestCase):
-    def test_tau_decay_without_rp(self):
+    def test_open_tau_without_rp(self):
         """Test tau decay time calculation without a parallel resistance (rp=None)."""
         rs = 24.764  # Series resistance in ohms
         ls = 38.959e-3  # Inductance in henries
@@ -100,7 +100,7 @@ class TestDecayTimeMethod(unittest.TestCase):
         c0 = 3970.1e-12  # Parallel capacitance in farads
 
         # Calculate decay time without rp
-        result = tau_decay(rs=rs, ls=ls, cs=cs, c0=c0, rp=None)
+        result = open_tau(rs=rs, ls=ls, cs=cs, c0=c0, rp=None)
 
         # Expected decay time (τ = 2L / R)
         expected = 2 * ls / rs
@@ -108,7 +108,7 @@ class TestDecayTimeMethod(unittest.TestCase):
         # Assert the result is correct
         self.assertAlmostEqual(result, expected, places=6)
 
-    def test_tau_decay_with_rp(self):
+    def test_open_tau_with_rp(self):
         """Test tau decay time calculation with a parallel resistance (rp provided)."""
         rs = 24.764  # Series resistance in ohms
         ls = 38.959e-3  # Inductance in henries
@@ -117,15 +117,15 @@ class TestDecayTimeMethod(unittest.TestCase):
         rp = 500  # Parallel resistance in ohms
 
         # Calculate decay time with rp
-        result = tau_decay(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
+        result = open_tau(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
 
         # Ensure the decay time is positive and finite
         self.assertGreater(result, 0)
         self.assertNotEqual(result, float("inf"))
 
-    def test_two_tau_decay_no_rp(self):
+    def test_two_open_tau_no_rp(self):
         """
-        Test two_tau_decay for specific parameters without a parallel resistance (rp=None):
+        Test two_open_tau for specific parameters without a parallel resistance (rp=None):
         rs = 21.05, ls = 35.15e-3, cs = 448.62e-12, c0 = 4075.69e-12.
         """
         rs = 21.05  # Series resistance in ohms
@@ -134,7 +134,7 @@ class TestDecayTimeMethod(unittest.TestCase):
         c0 = 4075.69e-12  # Parallel capacitance in farads
 
         # Calculate two_tau without rp
-        result = two_tau_decay(rs=rs, ls=ls, cs=cs, c0=c0, rp=None)
+        result = open_two_tau(rs=rs, ls=ls, cs=cs, c0=c0, rp=None)
 
         # Expected result is approximately 6.3 ms
         expected = 2 * (2 * ls / rs)  # Two tau without rp is 2 * (2 * L / R)
@@ -142,9 +142,9 @@ class TestDecayTimeMethod(unittest.TestCase):
         # Assert the result is within an acceptable range
         self.assertAlmostEqual(result, expected, delta=1e-4)  # Tolerance of 0.1 ms
 
-    def test_two_tau_decay_with_various_rp(self):
+    def test_two_open_tau_with_various_rp(self):
         """
-        Test two_tau_decay for specific parameters with different parallel resistances (rp).
+        Test two_open_tau for specific parameters with different parallel resistances (rp).
         rs = 21.05, ls = 35.15e-3, cs = 448.62e-12, c0 = 4075.69e-12.
         """
         rs = 21.05  # Series resistance in ohms
@@ -164,7 +164,7 @@ class TestDecayTimeMethod(unittest.TestCase):
                 expected = case["expected"]
 
                 # Calculate two_tau with given rp
-                result = two_tau_decay(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
+                result = open_two_tau(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
 
                 # Assert the result is within an acceptable range
                 self.assertAlmostEqual(result, expected, delta=1e-4)  # Tolerance of 0.1 ms
@@ -177,19 +177,19 @@ class TestDecayTimeMethod(unittest.TestCase):
         c0 = 3970.1e-12
 
         with self.assertRaises(ValueError):
-            tau_decay(rs=-rs, ls=ls, cs=cs, c0=c0)  # Negative rs
+            open_tau(rs=-rs, ls=ls, cs=cs, c0=c0)  # Negative rs
 
         with self.assertRaises(ValueError):
-            tau_decay(rs=rs, ls=0, cs=cs, c0=c0)  # Zero ls
+            open_tau(rs=rs, ls=0, cs=cs, c0=c0)  # Zero ls
 
         with self.assertRaises(ValueError):
-            tau_decay(rs=rs, ls=ls, cs=0, c0=c0)  # Zero cs
+            open_tau(rs=rs, ls=ls, cs=0, c0=c0)  # Zero cs
 
         with self.assertRaises(ValueError):
-            tau_decay(rs=rs, ls=ls, cs=cs, c0=-c0)  # Negative c0
+            open_tau(rs=rs, ls=ls, cs=cs, c0=-c0)  # Negative c0
 
         with self.assertRaises(ValueError):
-            tau_decay(rs=rs, ls=ls, cs=cs, c0=c0, rp=-100)  # Negative rp
+            open_tau(rs=rs, ls=ls, cs=cs, c0=c0, rp=-100)  # Negative rp
 
     def test_randomized_parameters(self):
         """Test tau decay time with randomized positive non-zero values."""
@@ -201,7 +201,7 @@ class TestDecayTimeMethod(unittest.TestCase):
             rp = random.choice([None, random.uniform(10, 1000)])
 
             # Calculate decay time
-            result = tau_decay(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
+            result = open_tau(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
 
             # Ensure the decay time is positive and finite
             self.assertGreater(result, 0)
@@ -216,7 +216,7 @@ class TestDecayTimeMethod(unittest.TestCase):
         rp = 1e6  # Very high parallel resistance
 
         # Calculate decay time
-        result = tau_decay(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
+        result = open_tau(rs=rs, ls=ls, cs=cs, c0=c0, rp=rp)
 
         # Ensure decay time is finite
         self.assertGreater(result, 0)
@@ -249,7 +249,7 @@ class TestOptimumResistance(unittest.TestCase):
         resistance_range = (10000, 100000)
 
         # Bias the decay time to favor the lower bound
-        with patch("transientbvd.tau_decay", side_effect=lambda rs, ls, cs, c0, rp: rp + 1e-6):
+        with patch("transientbvd.open_tau", side_effect=lambda rs, ls, cs, c0, rp: rp + 1e-6):
             with self.assertLogs(level="WARNING") as log:
                 optimum_resistance(rs, ls, cs, c0, resistance_range)
                 self.assertTrue(
@@ -264,7 +264,7 @@ class TestOptimumResistance(unittest.TestCase):
         c0 = 3970.1e-12
         resistance_range = (10, 50)
 
-        with patch("transientbvd.tau_decay", side_effect=lambda rs, ls, cs, c0, rp: -rp):
+        with patch("transientbvd.open_tau", side_effect=lambda rs, ls, cs, c0, rp: -rp):
             with self.assertLogs(level="WARNING") as log:
                 optimum_resistance(rs, ls, cs, c0, resistance_range)
                 self.assertTrue(

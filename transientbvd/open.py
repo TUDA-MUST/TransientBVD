@@ -4,6 +4,7 @@ from scipy.optimize import minimize_scalar
 
 from .utils import roots
 
+
 def print_open_potential(
     rs: float,
     ls: float,
@@ -137,7 +138,7 @@ def open_potential(
     return optimal_resistance, tau_with_rp, delta_time, percentage_improvement
 
 
-def tau_decay(
+def open_tau(
     rs: float,
     ls: float,
     cs: float,
@@ -195,7 +196,7 @@ def tau_decay(
     return 1 / decay_rate if decay_rate > 0 else float("inf")
 
 
-def two_tau_decay(
+def open_two_tau(
     rs: float,
     ls: float,
     cs: float,
@@ -235,7 +236,7 @@ def two_tau_decay(
     - When `rp` is provided, the decay time is determined using the eigenvalues of
       the characteristic polynomial.
     """
-    return 2 * tau_decay(rs, ls, cs, c0, rp)
+    return 2 * open_tau(rs, ls, cs, c0, rp)
 
 
 def optimum_resistance(
@@ -286,7 +287,7 @@ def optimum_resistance(
         """
         Wrapper for decay_time to match the signature for optimization.
         """
-        return tau_decay(rs, ls, cs, c0, rp=rp)
+        return open_tau(rs, ls, cs, c0, rp=rp)
 
     # Perform numerical optimization to find the resistance that minimizes decay time
     result = minimize_scalar(
@@ -318,7 +319,7 @@ from typing import Optional, Callable
 import math
 
 
-def current(
+def open_current(
     i0: float,
     t: float,
     rs: float,
@@ -404,6 +405,11 @@ if __name__ == "__main__":
     ls = 38.959e-3  # Inductance in henries
     cs = 400.33e-12  # Series capacitance in farads
     c0 = 3970.1e-12  # Parallel capacitance in farads
+
+    rs=1
+    ls=29e-3
+    cs=3.9e-12
+    c0 = 12e-12
 
     print_open_potential(rs, ls, cs, c0)
 
