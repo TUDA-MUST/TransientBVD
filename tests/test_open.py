@@ -7,6 +7,7 @@ from transientbvd import tau_decay, two_tau_decay, optimum_resistance, open_pote
 
 logging.basicConfig(level=logging.WARNING)
 
+
 class TestPrintOpenPotential(unittest.TestCase):
     @patch("builtins.print")  # Mock the print function
     def test_print_open_potential(self, mock_print):
@@ -22,6 +23,7 @@ class TestPrintOpenPotential(unittest.TestCase):
 
         # Assert that print was called at least once
         self.assertTrue(mock_print.called)
+
 
 class TestOpenPotentialMethod(unittest.TestCase):
     def test_open_potential_basic_case(self):
@@ -87,6 +89,7 @@ class TestOpenPotentialMethod(unittest.TestCase):
         self.assertGreater(tau_with_rp, 0)
         self.assertGreater(delta_time, 0)
         self.assertGreater(percentage_improvement, 0)
+
 
 class TestDecayTimeMethod(unittest.TestCase):
     def test_tau_decay_without_rp(self):
@@ -218,6 +221,7 @@ class TestDecayTimeMethod(unittest.TestCase):
         # Ensure decay time is finite
         self.assertGreater(result, 0)
         self.assertNotEqual(result, float("inf"))
+
 
 class TestOptimumResistance(unittest.TestCase):
     def test_optimum_resistance_basic(self):

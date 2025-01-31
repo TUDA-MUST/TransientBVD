@@ -24,5 +24,6 @@ def main():
     print(f"  Optimal Resistance: {optimal_resistance:.2f} Ω")
     print(f"  Minimal Decay Time: {minimal_decay_time:.6f} s ({minimal_decay_time * 1e3:.2f} ms)")
 
+
 if __name__ == "__main__":
     main()
