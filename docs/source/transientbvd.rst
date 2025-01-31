@@ -1,45 +1,33 @@
-transientbvd package
+transientbvd Package
 ====================
 
-Submodules
-----------
-
-transientbvd.closed module
---------------------------
-
-.. automodule:: transientbvd.closed
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-transientbvd.open module
-------------------------
-
+Open-Circuit Methods (open.py)
+------------------------------
 .. automodule:: transientbvd.open
    :members:
    :undoc-members:
    :show-inheritance:
 
-transientbvd.transducer module
-------------------------------
 
+Closed-Circuit Methods (closed.py)
+----------------------------------
+.. automodule:: transientbvd.closed
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Transducer Class (transducer.py)
+--------------------------------
 .. automodule:: transientbvd.transducer
    :members:
    :undoc-members:
    :show-inheritance:
 
-transientbvd.utils module
--------------------------
 
+Utility Functions (utils.py)
+----------------------------
 .. automodule:: transientbvd.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: transientbvd
    :members:
    :undoc-members:
    :show-inheritance:
