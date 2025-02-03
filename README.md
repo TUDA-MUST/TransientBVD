@@ -1,6 +1,6 @@
 # TransientBVD
 [![PyPI](https://img.shields.io/pypi/v/transientbvd.svg?style=flat-square)](https://pypi.python.org/pypi/transientbvd)
-[![Tests](https://github.com/<owner>/<repo>/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/<owner>/<repo>/actions/workflows/tests.yml)
+![Tests](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/tests.yml/badge.svg)
 ![Pylint](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/pylint.yml/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/transientbvd/badge/?version=latest&style=flat-square)](https://transientbvd.readthedocs.io/en/latest/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
