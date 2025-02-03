@@ -135,3 +135,31 @@ def roots(
 
     return [complex(root.evalf()) for root in p_roots]  # Convert roots to complex numbers
 
+
+def print_circuit_params(rs: float, ls: float, cs: float, c0: float) -> None:
+    """
+    Print the Butterworth-Van Dyke (BVD) model circuit parameters in a formatted output.
+
+    Parameters
+    ----------
+    rs : float
+        Series resistance in ohms (Ω).
+    ls : float
+        Inductance in henries (H).
+    cs : float
+        Series capacitance in farads (F).
+    c0 : float
+        Parallel capacitance in farads (F).
+
+    Returns
+    -------
+    None
+        Prints the circuit parameters to the console in a formatted way.
+    """
+    print("Butterworth-Van Dyke (BVD) Model Parameters")
+    print("=" * 50)
+    print(f"Series Resistance (Rs): {rs:.2f} Ω")
+    print(f"Inductance (Ls): {ls:.6e} H")
+    print(f"Series Capacitance (Cs): {cs:.6e} F")
+    print(f"Parallel Capacitance (C0): {c0:.6e} F")
+    print("=" * 50)

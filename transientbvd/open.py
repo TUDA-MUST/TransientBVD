@@ -6,7 +6,7 @@ from typing import Tuple
 import numpy as np
 from scipy.optimize import minimize_scalar
 
-from .utils import roots
+from .utils import roots, print_circuit_params
 
 
 def print_open_potential(
@@ -52,12 +52,9 @@ def print_open_potential(
     print("=" * 50)
     print("Open Potential Analysis")
     print("=" * 50)
-    print(f"Series Resistance (Rs): {rs:.2f} Ω")
-    print(f"Inductance (Ls): {ls:.6e} H")
-    print(f"Series Capacitance (Cs): {cs:.6e} F")
-    print(f"Parallel Capacitance (C0): {c0:.6e} F")
-    print(f"Resistance Range: {resistance_range[0]} Ω to {resistance_range[1]} Ω")
-    print("-" * 50)
+
+    print_circuit_params(rs, ls, cs, c0)
+
     print(f"Optimal Parallel Resistance (Rp): {optimal_resistance:.2f} Ω")
     print(f"Decay Time (τ) without Rp: {tau_no_rp:.6f} s ({tau_no_rp * 1e3:.2f} ms)")
     print(f"Decay Time (τ) with Rp: {tau_with_rp:.6f} s ({tau_with_rp * 1e3:.2f} ms)")
@@ -91,7 +88,8 @@ def open_potential(
 
     where :math:`L` is the inductance and :math:`R` is the series resistance.
 
-    The improvement is expressed as the absolute difference in decay time and the percentage reduction.
+    The improvement is expressed as the absolute difference in decay time
+    and the percentage reduction.
 
     Parameters
     ----------
@@ -251,8 +249,9 @@ def optimum_resistance(
     resistance_range: Tuple[float, float]
 ) -> Tuple[float, float]:
     """
-    Calculate the optimal parallel resistance (highest damping) for the transient response
-    in a system modeled by the Butterworth-Van Dyke (BVD) equivalent circuit using numerical optimization.
+    Calculate the optimal parallel resistance (highest damping)
+    for the transient response in a system modeled by the
+    Butterworth-Van Dyke (BVD) equivalent circuit using numerical optimization.
 
     Parameters
     ----------
@@ -277,7 +276,8 @@ def optimum_resistance(
     Raises
     ------
     ValueError
-        If any BVD model parameter (rs, ls, cs, c0) is not positive or if resistance bounds are invalid.
+        If any BVD model parameter (rs, ls, cs, c0) is not positive
+        or if resistance bounds are invalid.
     """
     # Validate input parameters
     if rs <= 0 or ls <= 0 or cs <= 0 or c0 <= 0:
@@ -309,11 +309,13 @@ def optimum_resistance(
     tolerance = 0.01 * (upper_bound - lower_bound)  # 1% of the range
     if abs(optimal_resistance - lower_bound) < tolerance:
         logging.warning(
-            f"Hint: The optimal resistance ({optimal_resistance:.2f} ohms) is near the lower bound of the range. "
+            f"Hint: The optimal resistance ({optimal_resistance:.2f} ohms) "
+            f"is near the lower bound of the range. "
             f"Consider reducing the lower bound.")
     elif abs(optimal_resistance - upper_bound) < tolerance:
         logging.warning(
-            f"Hint: The optimal resistance ({optimal_resistance:.2f} ohms) is near the upper bound of the range. "
+            f"Hint: The optimal resistance ({optimal_resistance:.2f} ohms) "
+            f" near the upper bound of the range. "
             f"Consider increasing the upper bound.")
 
     return optimal_resistance, minimal_decay_time
@@ -375,7 +377,8 @@ def open_current(
       those special cases. This code demonstrates the typical 3-distinct-roots scenario.
     """
 
-    # 1) Get the eigenvalues from the BVD polynomial (3rd order if rp is not None, or still 3rd if rp=None).
+    # 1) Get the eigenvalues from the BVD polynomial
+    # (3rd order if rp is not None, or still 3rd if rp=None).
     lam_list = roots(rs, ls, cs, c0, rp=rp)  # returns up to 3 complex roots typically
     if len(lam_list) != 3:
         raise ValueError(
@@ -407,7 +410,7 @@ def open_current(
     #      [ lam1_c   lam2_c    lam3_c  ]
     #      [ lam1_c^2 lam2_c^2  lam3_c^2]
 
-    M = np.array([
+    matrix = np.array([
         [1.0,     1.0,     1.0    ],
         [lam1_c,  lam2_c,  lam3_c ],
         [lam1_c**2, lam2_c**2, lam3_c**2]
@@ -416,19 +419,17 @@ def open_current(
     rhs = np.array([i0, 0.0, 0.0], dtype=complex)
 
     # 4) Solve the 3x3 system for A, B, C using numpy
-    sol_ABC = np.linalg.solve(M, rhs)
-    A_coef, B_coef, C_coef = sol_ABC
+    solution_abc = np.linalg.solve(matrix, rhs)
+    a_coef, b_coef, c_coef = solution_abc
 
     # 5) Evaluate i(t) = A e^(lam1 t) + B e^(lam2 t) + C e^(lam3 t).
     i_t = (
-        A_coef * cmath.exp(lam1_c * t)
-        + B_coef * cmath.exp(lam2_c * t)
-        + C_coef * cmath.exp(lam3_c * t)
+        a_coef * cmath.exp(lam1_c * t)
+        + b_coef * cmath.exp(lam2_c * t)
+        + c_coef * cmath.exp(lam3_c * t)
     )
 
-    # The physical current is typically the real part (the imaginary part should be near zero
-    # in a well-formed system if the roots come in conjugate pairs).
+    # The physical current is typically the real part
+    # (the imaginary part should be near zero in a well-formed system
+    # if the roots come in conjugate pairs).
     return i_t.real
-
-
-

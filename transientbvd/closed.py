@@ -1,6 +1,15 @@
+"""
+TransientBVD - Closed Circuit Transient Analysis
+
+This module contains functions for analyzing the closed-circuit transient
+response of resonant circuits modeled by the Butterworth-Van Dyke (BVD)
+equivalent circuit.
+"""
 from typing import Tuple, Optional
-import numpy as np
 import math
+import numpy as np
+
+from transientbvd.utils import print_circuit_params
 
 
 def closed_current(
@@ -23,7 +32,8 @@ def closed_current(
     Parameters
     ----------
     t : float
-        Time in seconds. If `np.inf` is provided, this returns the steady-state current (U_cw / R_s).
+        Time in seconds. If `np.inf` is provided,
+        this returns the steady-state current (U_cw / R_s).
     ucw : float
         Operating (continuous-wave) voltage amplitude in volts. Must be > 0.
     rs : float
@@ -87,7 +97,8 @@ def closed_current(
 
     # Steady-state current if t == np.inf
     if np.isinf(t):
-        return abs(ucw / rs)  # absolute in case ucw or rs were negative, but we assert > 0, so just "ucw / rs" is fine
+        return abs(ucw / rs)  # absolute in case ucw or rs were negative,
+        # but we assert > 0, so just "ucw / rs" is fine
     else:
         assert t >= 0, "Time must be non-negative."
 
@@ -177,7 +188,8 @@ def closed_4tau(
     t_sw: Optional[float] = None
 ) -> float:
     """
-    Calculate the time at which the oscillation amplitude first reaches 98.2% of the steady-state current.
+    Calculate the time at which the oscillation amplitude first reaches
+    98.2% of the steady-state current.
 
     This is often referred to as the 4τ time, where the system has achieved approximately 98.2%
     of its final amplitude for a damped oscillation.
@@ -233,16 +245,18 @@ def closed_4tau(
         if amp_t_sw == threshold:
             return t_sw
 
-        # ub is applied and at t_sw, the current amplitude is greater than threshold -> only need to consider ub
+        # ub is applied and at t_sw, the current amplitude is greater than threshold
+        # -> only need to consider ub
         if amp_t_sw > threshold:
             t_reached = -tau * math.log(1.0 - (threshold * rs / ub))
             return float(t_reached)
 
-        # ub is applied and at t_sw, the current amplitude is less than threshold -> we need to consider both ub and ucw
-        else:
-            t_reached = tau * math.log(
-                (ub * math.exp(t_sw / tau) - ub - ucw * math.exp(t_sw / tau)) / (rs * threshold - ucw))
-            return float(t_reached)
+        # ub is applied and at t_sw, the current amplitude is less than threshold
+        # -> we need to consider both ub and ucw
+        t_reached = tau * math.log(
+            (ub * math.exp(t_sw / tau) - ub - ucw * math.exp(t_sw / tau))
+            / (rs * threshold - ucw))
+        return float(t_reached)
 
     # No overboost scenario
     t_reached = -tau * math.log(1.0 - (threshold * rs / ucw))
@@ -339,11 +353,9 @@ def print_closed_potential(
     print("=" * 50)
     print("Closed-Circuit Overboosting Potential Analysis")
     print("=" * 50)
-    print(f"Series Resistance (Rs): {rs:.2f} Ω")
-    print(f"Inductance (Ls): {ls:.6e} H")
-    print(f"Series Capacitance (Cs): {cs:.6e} F")
-    print(f"Parallel Capacitance (C0): {c0:.6e} F")
-    print("-" * 50)
+
+    print_circuit_params(rs, ls, cs, c0)
+
     print(f"Switching Time (t_sw): {t_sw:.6f} s ({t_sw * 1e3:.2f} ms)")
     print(f"4τ without Overboosting: {tau_no_boost:.6f} s ({tau_no_boost * 1e3:.2f} ms)")
     print(f"4τ with Overboosting: {tau_with_boost:.6f} s ({tau_with_boost * 1e3:.2f} ms)")
