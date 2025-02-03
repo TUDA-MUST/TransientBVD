@@ -1,5 +1,9 @@
+import cmath
 import logging
-from typing import Tuple, Optional
+from typing import Optional
+from typing import Tuple
+
+import numpy as np
 from scipy.optimize import minimize_scalar
 
 from .utils import roots
@@ -315,102 +319,116 @@ def optimum_resistance(
     return optimal_resistance, minimal_decay_time
 
 
-from typing import Optional, Callable
-import math
-
-
 def open_current(
-    i0: float,
     t: float,
+    i0: float,
     rs: float,
     ls: float,
     cs: float,
-    c0: float,
+    c0: Optional[float] = None,
     rp: Optional[float] = None
 ) -> float:
     r"""
-    Calculate the transient current behavior for a given time `t` and circuit parameters.
+    Calculate the transient current i(t) for an open-circuit BVD model (3rd order),
+    assuming initial conditions:
+      i(0) = i0, i'(0) = 0, i''(0) = 0.
 
-    This method models the current response using the roots of the characteristic polynomial
-    for the Butterworth-Van Dyke (BVD) equivalent circuit.
+    The system's eigenvalues are taken from ``roots(...)``. For a 3rd-order polynomial
+    (e.g., including parallel capacitance and optional parallel resistor), we get
+    three eigenvalues :math:`\lambda_1, \lambda_2, \lambda_3`. The solution is:
+
+    .. math::
+
+       i(t) = A\, e^{\lambda_1 t} + B\, e^{\lambda_2 t} + C\, e^{\lambda_3 t},
+
+    with coefficients :math:`A,B,C` determined from the above initial conditions.
 
     Parameters
     ----------
-    i0 : float
-        Initial current in amperes.
     t : float
-        Time in seconds.
+        Time in seconds at which to evaluate i(t).
+    i0 : float
+        Initial current in amperes (i(0) = i0).
     rs : float
-        Series resistance in ohms (BVD model parameter).
+        Series resistance in ohms.
     ls : float
-        Inductance in henries (BVD model parameter).
+        Motional inductance in henries.
     cs : float
-        Series capacitance in farads (BVD model parameter).
+        Motional capacitance in farads.
     c0 : float
-        Parallel capacitance in farads (BVD model parameter).
-    rp : Optional[float], default=None
-        Parallel resistance in ohms. If None, calculates the open circuit response.
-    voltage : Callable[[float, Optional[float]], float], default=lambda t, rp: 0
-        Voltage function as a function of time `t` and parallel resistance `rp`.
+        Parallel (static) capacitance in farads. Will not be used either way.
+    rp : Optional[float]
+        Parallel resistor. If None, purely open-circuit. If a value is given,
+        it modifies the polynomial.
 
     Returns
     -------
     float
-        Transient current at time `t`.
-
-    Raises
-    ------
-    ValueError
-        If any BVD model parameter (rs, ls, cs, c0) is not positive.
+        The real part of i(t) under these assumptions.
 
     Notes
     -----
-    - The `voltage` function should be implemented separately and passed to this method.
-    - The roots of the characteristic polynomial are calculated using the `roots` function.
+    - This approach is conceptual: you must confirm the three initial conditions
+      truly match your physical scenario. You might prefer i'(0)=some value if you had
+      a certain voltage at t=0, etc.
+    - If the system ends up with repeated roots or is effectively 2nd order, handle
+      those special cases. This code demonstrates the typical 3-distinct-roots scenario.
     """
-    # Validate parameters
-    if rs <= 0 or ls <= 0 or cs <= 0 or c0 <= 0:
-        raise ValueError("All BVD model parameters (rs, ls, cs, c0) must be positive.")
-    if rp is not None and rp <= 0:
-        raise ValueError("Parallel resistance `rp` must be positive if provided.")
 
-    # Calculate the roots of the characteristic polynomial
-    roots_list = roots(rs, ls, cs, c0, rp)
-    y1, y2, y3 = roots_list
+    # 1) Get the eigenvalues from the BVD polynomial (3rd order if rp is not None, or still 3rd if rp=None).
+    lam_list = roots(rs, ls, cs, c0, rp=rp)  # returns up to 3 complex roots typically
+    if len(lam_list) != 3:
+        raise ValueError(
+            f"Expected 3 eigenvalues, got {len(lam_list)}. "
+            "Check polynomial or special-case repeated roots."
+        )
 
-    A = I0 * res / 10
-    B = I0 / (1 / res + C0 * re(Y_list[ind][1]) + (C0 ** 2 * im(Y_list[ind][1]) ** 2) / (
-                1 / res + C0 * re(Y_list[ind][1])))
-    C = (C0 * B * abs(im(Y_list[ind][1]))) / (1 / res + C0 * re(Y_list[ind][1]))
-    return A * math.exp(Y_list[ind][0] * t) + math.exp(re(Y_list[ind][1]) * t) * (
-                B * math.cos(im(Y_list[ind][1]) * t) + C * math.cos(im(Y_list[ind][1]) * t))
+    lam1, lam2, lam3 = lam_list
 
-    # For demonstration purposes, here's a placeholder for coefficient calculations
-    # You may need to adjust these calculations based on the actual equations
-    A = i0  # Initial coefficient
-    # Additional coefficient calculations would go here
+    # 2) We assume i(t) = A e^(lam1 t) + B e^(lam2 t) + C e^(lam3 t).
+    #    Then:
+    #
+    #      i'(t)  = lam1 A e^(lam1 t) + lam2 B e^(lam2 t) + lam3 C e^(lam3 t)
+    #      i''(t) = lam1^2 A e^(lam1 t) + lam2^2 B e^(lam2 t) + lam3^2 C e^(lam3 t)
+    #
+    #    With initial conditions at t=0:
+    #      i(0)    = A + B + C           = i0
+    #      i'(0)   = lam1 A + lam2 B + lam3 C   = 0
+    #      i''(0)  = lam1^2 A + lam2^2 B + lam3^2 C = 0
 
-    # Compute the transient current using the voltage function
-    transient_current = (
-        (1 / rp) * voltage(t, rp) if rp else 0
-        + A * math.exp(y1 * t)
-        # Additional terms involving y2, y3 would be added here
+    lam1_c = complex(lam1)
+    lam2_c = complex(lam2)
+    lam3_c = complex(lam3)
+
+    # 3) Form the matrix M and the RHS vector.
+    #    M * [A, B, C]^T = [i0, 0, 0]^T
+    #    M is:
+    #      [ 1        1         1       ]
+    #      [ lam1_c   lam2_c    lam3_c  ]
+    #      [ lam1_c^2 lam2_c^2  lam3_c^2]
+
+    M = np.array([
+        [1.0,     1.0,     1.0    ],
+        [lam1_c,  lam2_c,  lam3_c ],
+        [lam1_c**2, lam2_c**2, lam3_c**2]
+    ], dtype=complex)
+
+    rhs = np.array([i0, 0.0, 0.0], dtype=complex)
+
+    # 4) Solve the 3x3 system for A, B, C using numpy
+    sol_ABC = np.linalg.solve(M, rhs)
+    A_coef, B_coef, C_coef = sol_ABC
+
+    # 5) Evaluate i(t) = A e^(lam1 t) + B e^(lam2 t) + C e^(lam3 t).
+    i_t = (
+        A_coef * cmath.exp(lam1_c * t)
+        + B_coef * cmath.exp(lam2_c * t)
+        + C_coef * cmath.exp(lam3_c * t)
     )
 
-    return transient_current
+    # The physical current is typically the real part (the imaginary part should be near zero
+    # in a well-formed system if the roots come in conjugate pairs).
+    return i_t.real
 
-
-if __name__ == "__main__":
-    rs = 24.764  # Series resistance in ohms
-    ls = 38.959e-3  # Inductance in henries
-    cs = 400.33e-12  # Series capacitance in farads
-    c0 = 3970.1e-12  # Parallel capacitance in farads
-
-    rs=1
-    ls=29e-3
-    cs=3.9e-12
-    c0 = 12e-12
-
-    print_open_potential(rs, ls, cs, c0)
 
 
