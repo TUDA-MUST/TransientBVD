@@ -29,7 +29,7 @@ include = ["transientbvd/data/*.json"]
 
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 sympy = "^1.13.3"
 scipy = "^1.14.1"
 pandas = "^2.2.3"
