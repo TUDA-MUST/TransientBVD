@@ -9,66 +9,59 @@ from typing import Tuple, Optional
 import math
 import numpy as np
 
-from transientbvd.utils import print_circuit_params
+from transientbvd.transducer import EquivalentCircuitParams
 
 
 def closed_current(
     t: float,
+    circuit_params: EquivalentCircuitParams,
     ucw: float,
-    rs: float,
-    ls: float,
-    cs: float,
-    c0: Optional[float],
     ub: Optional[float] = None,
     t_sw: Optional[float] = None
 ) -> float:
     """
     Compute the transient current response for a closed circuit (BVD model).
 
-    Initially applying a boost voltage amplitude (U_b) accelerates the current rise,
+    Initially applying a boost voltage amplitude (`U_b`) accelerates the current rise,
     reaching the desired steady-state current faster. After this initial phase,
-    the voltage is reduced to the operating level voltage amplitude (U_cw) for continuous wave mode.
+    the voltage is reduced to the operating level voltage amplitude (`U_cw`) for continuous wave mode.
 
     Parameters
     ----------
     t : float
-        Time in seconds. If `np.inf` is provided,
-        this returns the steady-state current (U_cw / R_s).
+        Time in seconds. If `np.inf` is provided, this returns the steady-state current (`U_cw / R_s`).
+    circuit_params : EquivalentCircuitParams
+        The equivalent circuit parameters representing the transducer.
     ucw : float
         Operating (continuous-wave) voltage amplitude in volts. Must be > 0.
-    rs : float
-        Series resistance in ohms. Must be > 0.
-    ls : float
-        Inductance in henries. Must be > 0.
-    cs : float
-        Series capacitance in farads. Must be > 0.
-    c0 : float, optional
-        Parallel capacitance in farads. If provided, must be > 0.
     ub : float, optional
-        Overboost voltage amplitude in volts. If provided, must be > 0 and > ucw.
+        Overboost voltage amplitude in volts. If provided, must be > 0 and > `U_cw`.
     t_sw : float, optional
-        Switching time in seconds. If provided, must be > 0. If not provided but ub is given,
-        it is computed via `switching_time`.
+        Switching time in seconds. If provided, must be > 0.
+        If not provided but `ub` is given, it is computed via `switching_time`.
 
     Returns
     -------
     float
-        The transient current at time t.
-        - If t == np.inf, returns the steady-state current (ucw / rs).
-        - If overboosting is used and t < t_sw, uses ub.
-        - If overboosting is used and t >= t_sw, switches to ucw with continuity.
-        - Otherwise, uses only ucw from t=0.
+        The transient current at time `t`.
+        - If `t == np.inf`, returns the steady-state current (`U_cw / R_s`).
+        - If overboosting is used and `t < t_sw`, uses `U_b`.
+        - If overboosting is used and `t >= t_sw`, switches to `U_cw` with continuity.
+        - Otherwise, uses only `U_cw` from `t=0`.
 
     Raises
     ------
     ValueError
-        If t_sw is provided without ub (invalid usage).
+        If `t_sw` is provided without `ub` (invalid usage).
     AssertionError
-        If any of rs, ls, cs, c0, ucw, or ub (when provided) are <= 0.
-        If ub <= ucw.
-        If t_sw <= 0.
-        If t < 0.
+        If any of `rs`, `ls`, `cs`, `c0`, `ucw`, or `ub` (when provided) are <= 0.
+        If `ub <= ucw`.
+        If `t_sw <= 0`.
+        If `t < 0`.
     """
+    # Extract circuit parameters
+    rs, ls, cs, c0 = circuit_params.rs, circuit_params.ls, circuit_params.cs, circuit_params.c0
+
     # Basic parameter checks
     assert ucw > 0, "ucw must be positive."
     assert rs > 0, "rs must be positive."
@@ -88,8 +81,8 @@ def closed_current(
 
     # If overboosting is specified but no switching time, compute the optimal one
     if ub is not None and t_sw is None:
-        t_sw = switching_time(ub, ucw, rs, ls)
-        print("Hint: Using optimal switching time t_sw =", t_sw)
+        t_sw = switching_time(circuit_params, ub, ucw)
+        print(f"Hint: Using optimal switching time t_sw = {t_sw:.6f} s")
 
     # Convert array-like times to float
     if isinstance(t, (np.ndarray, list)):
@@ -99,8 +92,8 @@ def closed_current(
     if np.isinf(t):
         return abs(ucw / rs)  # absolute in case ucw or rs were negative,
         # but we assert > 0, so just "ucw / rs" is fine
-    else:
-        assert t >= 0, "Time must be non-negative."
+
+    assert t >= 0, "Time must be non-negative."
 
     # Fundamental parameters
     w_r = 1.0 / math.sqrt(ls * cs)
@@ -129,41 +122,41 @@ def closed_current(
 
 
 def switching_time(
+    circuit_params: EquivalentCircuitParams,
     ub: float,
-    ucw: float,
-    rs: float,
-    ls: float
+    ucw: float
 ) -> float:
     """
     Calculate the switching time for the transient response.
 
-    Initially applying a boost voltage amplitude U_b accelerates the current rise,
+    Initially applying a boost voltage amplitude `U_b` accelerates the current rise,
     allowing the transducer to reach the desired steady-state current faster.
-    After this initial phase, the voltage is reduced to the operating level voltage amplitude U_cw.
+    After this initial phase, the voltage is reduced to the operating level voltage amplitude `U_cw`.
 
     Parameters
     ----------
+    circuit_params : EquivalentCircuitParams
+        The equivalent circuit parameters representing the transducer.
     ub : float
-        Overboost voltage amplitude in volts (U_b). Must be > 0.
+        Overboost voltage amplitude in volts (`U_b`). Must be > 0.
     ucw : float
-        Continuous-wave voltage amplitude in volts (U_cw). Must be > 0.
-    rs : float
-        Series resistance in ohms. Must be > 0.
-    ls : float
-        Inductance in henries. Must be > 0.
+        Continuous-wave voltage amplitude in volts (`U_cw`). Must be > 0.
 
     Returns
     -------
     float
-        Switching time in seconds for optimal transition from U_b to U_cw.
+        Switching time in seconds for optimal transition from `U_b` to `U_cw`.
 
     Raises
     ------
     ValueError
-        If ub <= ucw, since the logarithm would be invalid or meaningless.
+        If `ub <= ucw`, since the logarithm would be invalid or meaningless.
     AssertionError
-        If any parameter is <= 0.
+        If any circuit parameter (`rs`, `ls`) is <= 0.
     """
+    # Extract parameters
+    rs, ls = circuit_params.rs, circuit_params.ls
+
     # Basic parameter checks
     assert ub > 0, "ub must be positive."
     assert ucw > 0, "ucw must be positive."
@@ -174,16 +167,14 @@ def switching_time(
     if ub <= ucw:
         raise ValueError("U_b must be greater than U_cw for a valid calculation.")
 
+    # Compute time constant
     tau = 2.0 * ls / rs
     return -tau * math.log(1.0 - (ucw / ub))
 
 
 def closed_4tau(
+    circuit_params: EquivalentCircuitParams,
     ucw: float,
-    rs: float,
-    ls: float,
-    cs: float,
-    c0: Optional[float] = None,
     ub: Optional[float] = None,
     t_sw: Optional[float] = None
 ) -> float:
@@ -196,16 +187,10 @@ def closed_4tau(
 
     Parameters
     ----------
+    circuit_params : EquivalentCircuitParams
+        The equivalent circuit parameters representing the transducer.
     ucw : float
         Continuous-wave voltage amplitude in volts. Must be > 0.
-    rs : float
-        Series resistance in ohms. Must be > 0.
-    ls : float
-        Inductance in henries. Must be > 0.
-    cs : float
-        Series capacitance in farads. Must be > 0.
-    c0 : float, optional
-        Parallel capacitance in farads. If provided, must be > 0.
     ub : float, optional
         Overboost voltage amplitude in volts. If provided, must be > 0 and > ucw.
     t_sw : float, optional
@@ -216,13 +201,21 @@ def closed_4tau(
     float
         The time in seconds at which the current amplitude first reaches 98.2% of U_cw / R_s.
     """
+    # Extract circuit parameters
+    rs, ls, cs, c0 = (
+        circuit_params.rs,
+        circuit_params.ls,
+        circuit_params.cs,
+        circuit_params.c0,
+    )
+
     # Basic parameter checks
     assert ucw > 0, "ucw must be positive."
     assert rs > 0, "rs must be positive."
     assert ls > 0, "ls must be positive."
     assert cs > 0, "cs must be positive."
-    if c0 is not None:
-        assert c0 > 0, "c0 must be positive if provided."
+    assert c0 > 0, "c0 must be positive."
+
     if ub is not None:
         assert ub > 0, "ub must be positive if provided."
         if ub <= ucw:
@@ -230,32 +223,34 @@ def closed_4tau(
     if t_sw is not None:
         assert t_sw > 0, "t_sw must be positive if provided."
 
+    # Calculate time constant
     tau = 2.0 * ls / rs
-    steady_state_current = ucw / rs
-    threshold = 0.982 * steady_state_current  # 98.2% threshold -> 4tau
 
-    # Possibly compute t_sw if ub is given but not specified
+    # Calculate steady-state current
+    steady_state_current = ucw / rs
+    threshold = 0.982 * steady_state_current  # 98.2% threshold -> 4τ
+
+    # Compute t_sw if ub is given but not specified
     if ub is not None and t_sw is None:
         t_sw = switching_time(ub, ucw, rs, ls)
 
     if ub is not None and t_sw is not None:
         amp_t_sw = (ub / rs) * (1 - math.exp(-t_sw / tau))
 
-        # only ub is applied, t_sw perfectly switches
+        # If only ub is applied and it reaches exactly the threshold
         if amp_t_sw == threshold:
             return t_sw
 
-        # ub is applied and at t_sw, the current amplitude is greater than threshold
-        # -> only need to consider ub
+        # If ub alone is sufficient to reach the threshold
         if amp_t_sw > threshold:
             t_reached = -tau * math.log(1.0 - (threshold * rs / ub))
             return float(t_reached)
 
-        # ub is applied and at t_sw, the current amplitude is less than threshold
-        # -> we need to consider both ub and ucw
+        # If ub alone is not sufficient, combine ub and ucw effects
         t_reached = tau * math.log(
             (ub * math.exp(t_sw / tau) - ub - ucw * math.exp(t_sw / tau))
-            / (rs * threshold - ucw))
+            / (rs * threshold - ucw)
+        )
         return float(t_reached)
 
     # No overboost scenario
@@ -264,10 +259,7 @@ def closed_4tau(
 
 
 def closed_potential(
-    rs: float,
-    ls: float,
-    cs: float,
-    c0: float,
+    circuit_params: EquivalentCircuitParams,
     ucw: float,
     ub: float
 ) -> Tuple[float, float, float, float, float]:
@@ -276,14 +268,8 @@ def closed_potential(
 
     Parameters
     ----------
-    rs : float
-        Series resistance in ohms. Must be > 0.
-    ls : float
-        Inductance in henries. Must be > 0.
-    cs : float
-        Series capacitance in farads. Must be > 0.
-    c0 : float
-        Parallel capacitance in farads. Must be > 0.
+    circuit_params : EquivalentCircuitParams
+        The equivalent circuit parameters representing the transducer.
     ucw : float
         Continuous-wave voltage amplitude in volts. Must be > 0.
     ub : float
@@ -299,32 +285,36 @@ def closed_potential(
         (5) percentage_improvement: Percentage improvement in transient response time.
     """
     # Parameter checks
-    assert rs > 0, "rs must be positive."
-    assert ls > 0, "ls must be positive."
-    assert cs > 0, "cs must be positive."
-    assert c0 > 0, "c0 must be positive."
+    assert circuit_params.rs > 0, "rs must be positive."
+    assert circuit_params.ls > 0, "ls must be positive."
+    assert circuit_params.cs > 0, "cs must be positive."
+    assert circuit_params.c0 > 0, "c0 must be positive."
     assert ucw > 0, "ucw must be positive."
     if ub <= ucw:
         raise ValueError("U_b must be greater than U_cw for a valid calculation.")
 
+    # Extract circuit parameters
+    rs, ls, cs, c0 = (
+        circuit_params.rs,
+        circuit_params.ls,
+        circuit_params.cs,
+        circuit_params.c0,
+    )
+
+    # Compute switching time and transient response times
     t_sw = switching_time(ub, ucw, rs, ls)
     tau_no_boost = closed_4tau(ucw, rs, ls, cs, c0)
     tau_with_boost = closed_4tau(ucw, rs, ls, cs, c0, ub, t_sw)
 
+    # Compute improvements
     delta_time = tau_no_boost - tau_with_boost
-    if tau_no_boost > 0:
-        percentage_improvement = (delta_time / tau_no_boost) * 100.0
-    else:
-        percentage_improvement = 0.0
+    percentage_improvement = (delta_time / tau_no_boost) * 100.0 if tau_no_boost > 0 else 0.0
 
     return t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement
 
 
 def print_closed_potential(
-    rs: float,
-    ls: float,
-    cs: float,
-    c0: float,
+    circuit_params: EquivalentCircuitParams,
     ucw: float,
     ub: float
 ) -> None:
@@ -333,28 +323,22 @@ def print_closed_potential(
 
     Parameters
     ----------
-    rs : float
-        Series resistance in ohms.
-    ls : float
-        Inductance in henries.
-    cs : float
-        Series capacitance in farads.
-    c0 : float
-        Parallel capacitance in farads.
+    circuit_params : EquivalentCircuitParams
+        The equivalent circuit parameters representing the transducer.
     ucw : float
         Continuous-wave voltage amplitude in volts.
     ub : float
         Overboost voltage amplitude in volts.
     """
     t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement = closed_potential(
-        rs, ls, cs, c0, ucw, ub
+        circuit_params.rs, circuit_params.ls, circuit_params.cs, circuit_params.c0, ucw, ub
     )
 
     print("=" * 50)
     print("Closed-Circuit Overboosting Potential Analysis")
     print("=" * 50)
 
-    print_circuit_params(rs, ls, cs, c0)
+    circuit_params.pretty_print()
 
     print(f"Switching Time (t_sw): {t_sw:.6f} s ({t_sw * 1e3:.2f} ms)")
     print(f"4τ without Overboosting: {tau_no_boost:.6f} s ({tau_no_boost * 1e3:.2f} ms)")
