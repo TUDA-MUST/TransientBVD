@@ -1,0 +1,12 @@
+- name: Publish Pylint Score as Badge
+  run: |
+    mkdir -p badge
+    pylint_score=$(cat pylint_score.txt)
+    echo "{ \"schemaVersion\": 1, \"label\": \"pylint\", \"message\": \"$pylint_score/10\", \"color\": \"blue\" }" > badge/pylint.json
+  continue-on-error: true
+
+- name: Deploy Badge to GitHub Pages
+  uses: peaceiris/actions-gh-pages@v3
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    publish_dir: ./badge
