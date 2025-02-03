@@ -37,7 +37,7 @@ class EquivalentCircuitParams:
     ls: float
     cs: float
     c0: float
-    rp: float = None  # Optional parallel resistance
+    rp: Optional[float] = None  # Optional parallel resistance
 
     def __repr__(self) -> str:
         """
@@ -83,24 +83,25 @@ class EquivalentCircuitParams:
 
 
 @dataclass
-class Transducer:
+class Transducer(EquivalentCircuitParams):
     """
-    Represents a transducer with predefined parameters for testing or simulation.
+    Represents an ultrasound transducer with predefined parameters.
+
+    Inherits from EquivalentCircuitParams, allowing direct access to all
+    electrical circuit parameters while also storing metadata such as
+    the transducer's name, manufacturer, and resonance frequency.
 
     Attributes
     ----------
     name : str
         The name of the transducer.
-    circuit_params : EquivalentCircuitParams
-        The equivalent circuit parameters representing the transducer.
     manufacturer : Optional[str]
         Manufacturer information for the transducer.
     frequency : float
         Resonance frequency of the transducer, calculated upon initialization.
     """
 
-    name: str
-    circuit_params: EquivalentCircuitParams
+    name: Optional[str] = "Unknown"
     manufacturer: Optional[str] = None
     frequency: float = field(init=False)  # Calculated after initialization
 
@@ -109,59 +110,18 @@ class Transducer:
         Calculate the resonance frequency of the transducer after initialization.
         This ensures the `frequency` attribute is always available.
         """
-        self.frequency = resonance_frequency(
-            self.circuit_params.rs,
-            self.circuit_params.ls,
-            self.circuit_params.cs,
-            self.circuit_params.c0
-        )
+        self.frequency = resonance_frequency(self.rs, self.ls, self.cs, self.c0)
 
     def __str__(self) -> str:
-        """Return a user-friendly string representation of the transducer."""
+        """
+        Return a user-friendly string representation of the transducer.
+        """
         return (
             f"Transducer: {self.name}\n"
             f"Manufacturer: {self.manufacturer or 'Unknown'}\n"
-            f"Parameters: Rs={self.rs:.4f} Ω, Ls={self.ls:.6f} H, "
-            f"Cs={self.cs:.2e} F, C0={self.c0:.2e} F\n"
-            f"Resonance Frequency: {self.frequency:.2f} Hz\n"
-            f"Parallel Resistance (Rp): {self.rp if self.rp else 'None'} Ω"
+            f"{super().__str__()}\n"
+            f"Resonance Frequency: {self.frequency:.2f} Hz"
         )
-
-    def get_circuit_params(self) -> EquivalentCircuitParams:
-        """
-        Retrieve the full circuit parameters as an EquivalentCircuitParams object.
-
-        Returns
-        -------
-        EquivalentCircuitParams
-            The transducer's circuit parameters.
-        """
-        return self.circuit_params
-
-    @property
-    def rs(self) -> float:
-        """Series resistance in ohms."""
-        return self.circuit_params.rs
-
-    @property
-    def ls(self) -> float:
-        """Inductance in henries."""
-        return self.circuit_params.ls
-
-    @property
-    def cs(self) -> float:
-        """Series capacitance in farads."""
-        return self.circuit_params.cs
-
-    @property
-    def c0(self) -> float:
-        """Parallel capacitance in farads."""
-        return self.circuit_params.c0
-
-    @property
-    def rp(self) -> Optional[float]:
-        """Parallel resistance in ohms (optional)."""
-        return self.circuit_params.rp
 
     @classmethod
     def from_parameters(
@@ -199,8 +159,7 @@ class Transducer:
         Transducer
             A `Transducer` instance with the specified parameters.
         """
-        circuit_params = EquivalentCircuitParams(rs, ls, cs, c0, rp)
-        return cls(name=name, circuit_params=circuit_params, manufacturer=manufacturer)
+        return cls(name=name, rs=rs, ls=ls, cs=cs, c0=c0, rp=rp, manufacturer=manufacturer)
 
 
 def load_transducers(json_file: str) -> Dict[str, Transducer]:
