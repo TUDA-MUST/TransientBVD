@@ -26,7 +26,7 @@ from .closed import (
 from .transducer import (
     Transducer,
     load_transducers,
-    predefined_transducer,
+    select_transducer,
     predefined_transducers,
 )
 
@@ -54,7 +54,7 @@ __all__ = [
     # From transducer.py
     "Transducer",
     "load_transducers",
-    "predefined_transducer",
+    "select_transducer",
     "predefined_transducers",
     # From utils.py
     "resonance_frequency",

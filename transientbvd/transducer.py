@@ -2,174 +2,176 @@
 TransientBVD - Transducer Model
 
 This module defines the `Transducer` class, which represents an ultrasound
-transducer with predefined parameters. The transducer internally uses the
-`EquivalentCircuitParams` class to store electrical circuit parameters.
+transducer with predefined parameters. The transducer stores electrical circuit
+parameters and additional metadata such as the manufacturer and resonance frequency.
 """
 
 import json
-from dataclasses import dataclass, field
+import math
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
-
-from .utils import resonance_frequency
+from typing import Dict
+from typing import Optional
 
 
 @dataclass
-class EquivalentCircuitParams:
+class Transducer:
     """
-    Represents the parameters of a Butterworth-Van Dyke (BVD) equivalent circuit.
+    Represents an ultrasound transducer with predefined parameters.
 
     Attributes
     ----------
     rs : float
-        Series resistance in ohms.
+        Series resistance in ohms. Must be positive.
     ls : float
-        Inductance in henries.
+        Inductance in henries. Must be positive.
     cs : float
-        Series capacitance in farads.
+        Series capacitance in farads. Must be positive.
     c0 : float
-        Parallel capacitance in farads.
-    rp : float, optional
-        Parallel resistance in ohms (default: None, meaning no parallel resistance).
+        Parallel capacitance in farads. Must be positive.
+    rp : Optional[float], default=None
+        Parallel resistance in ohms. If provided, must be positive.
+    name : str, default="Unknown"
+        The name of the transducer.
+    manufacturer : Optional[str], default=None
+        Manufacturer information for the transducer.
     """
 
     rs: float
     ls: float
     cs: float
     c0: float
-    rp: Optional[float] = None  # Optional parallel resistance
-
-    def __repr__(self) -> str:
-        """
-        Returns a formal string representation of the object, useful for debugging.
-
-        Returns
-        -------
-        str
-            A detailed string representation of the circuit parameters.
-        """
-        return (f"EquivalentCircuitParams(rs={self.rs}, ls={self.ls}, cs={self.cs}, "
-                f"c0={self.c0}, rp={self.rp})")
-
-    def __str__(self) -> str:
-        """
-        Returns a user-friendly string representation of the circuit parameters.
-
-        Returns
-        -------
-        str
-            A readable summary of the equivalent circuit parameters.
-        """
-        return (f"Equivalent Circuit Parameters:\n"
-                f"  - Series Resistance (Rs): {self.rs:.2f} Ω\n"
-                f"  - Inductance (Ls): {self.ls:.6e} H\n"
-                f"  - Series Capacitance (Cs): {self.cs:.6e} F\n"
-                f"  - Parallel Capacitance (C0): {self.c0:.6e} F\n"
-                f"  - Parallel Resistance (Rp): {self.rp if self.rp else 'None'} Ω")
-
-    def pretty_print(self) -> None:
-        """
-        Prints the circuit parameters in a well-formatted way.
-        """
-        print("=" * 50)
-        print(" Butterworth-Van Dyke Equivalent Circuit ")
-        print("=" * 50)
-        print(f"Series Resistance (Rs): {self.rs:.2f} Ω")
-        print(f"Inductance (Ls): {self.ls:.6e} H")
-        print(f"Series Capacitance (Cs): {self.cs:.6e} F")
-        print(f"Parallel Capacitance (C0): {self.c0:.6e} F")
-        print(f"Parallel Resistance (Rp): {self.rp if self.rp else 'None'} Ω")
-        print("=" * 50)
-
-
-@dataclass
-class Transducer(EquivalentCircuitParams):
-    """
-    Represents an ultrasound transducer with predefined parameters.
-
-    Inherits from EquivalentCircuitParams, allowing direct access to all
-    electrical circuit parameters while also storing metadata such as
-    the transducer's name, manufacturer, and resonance frequency.
-
-    Attributes
-    ----------
-    name : str
-        The name of the transducer.
-    manufacturer : Optional[str]
-        Manufacturer information for the transducer.
-    frequency : float
-        Resonance frequency of the transducer, calculated upon initialization.
-    """
-
-    name: Optional[str] = "Unknown"
+    rp: Optional[float] = None
+    name: str = "Unknown"
     manufacturer: Optional[str] = None
-    frequency: float = field(init=False)  # Calculated after initialization
 
     def __post_init__(self):
         """
-        Calculate the resonance frequency of the transducer after initialization.
-        This ensures the `frequency` attribute is always available.
+        Validate parameters upon initialization.
         """
-        self.frequency = resonance_frequency(self.rs, self.ls, self.cs, self.c0)
+        self._validate_parameters()
 
-    def __str__(self) -> str:
+    def _validate_parameters(self) -> None:
         """
-        Return a user-friendly string representation of the transducer.
-        """
-        return (
-            f"Transducer: {self.name}\n"
-            f"Manufacturer: {self.manufacturer or 'Unknown'}\n"
-            f"{super().__str__()}\n"
-            f"Resonance Frequency: {self.frequency:.2f} Hz"
-        )
+        Ensure all electrical parameters are positive.
 
-    @classmethod
-    def from_parameters(
-        cls,
-        name: str,
-        rs: float,
-        ls: float,
-        cs: float,
-        c0: float,
-        rp: Optional[float] = None,
-        manufacturer: Optional[str] = None
-    ) -> "Transducer":
+        Raises
+        ------
+        ValueError
+            If any parameter is non-positive.
         """
-        Create a `Transducer` instance directly from circuit parameters.
+        if self.rs <= 0:
+            raise ValueError("Series resistance (rs) must be positive.")
+        if self.ls <= 0:
+            raise ValueError("Inductance (ls) must be positive.")
+        if self.cs <= 0:
+            raise ValueError("Series capacitance (cs) must be positive.")
+        if self.c0 <= 0:
+            raise ValueError("Parallel capacitance (c0) must be positive.")
+        if self.rp is not None and self.rp <= 0:
+            raise ValueError("Parallel resistance (rp) must be positive if provided.")
+
+    @property
+    def frequency(self) -> float:
+        """
+        Compute the resonance frequency dynamically.
+
+        Returns
+        -------
+        float
+            Resonance frequency in Hz.
+        """
+        return 1 / (2 * math.pi * (self.ls * self.cs) ** 0.5)
+
+    def set_name(self, name: str) -> "Transducer":
+        """
+        Set the transducer's name.
 
         Parameters
         ----------
         name : str
-            Name of the transducer.
-        rs : float
-            Series resistance in ohms.
-        ls : float
-            Inductance in henries.
-        cs : float
-            Series capacitance in farads.
-        c0 : float
-            Parallel capacitance in farads.
-        rp : Optional[float], default=None
-            Parallel resistance in ohms.
-        manufacturer : Optional[str], default=None
-            Manufacturer information.
+            The name to assign to the transducer.
 
         Returns
         -------
         Transducer
-            A `Transducer` instance with the specified parameters.
+            The updated transducer instance (supports method chaining).
         """
-        return cls(name=name, rs=rs, ls=ls, cs=cs, c0=c0, rp=rp, manufacturer=manufacturer)
+        self.name = name
+        return self
+
+    def set_manufacturer(self, manufacturer: str) -> "Transducer":
+        """
+        Set the manufacturer of the transducer.
+
+        Parameters
+        ----------
+        manufacturer : str
+            The manufacturer name.
+
+        Returns
+        -------
+        Transducer
+            The updated transducer instance (supports method chaining).
+        """
+        self.manufacturer = manufacturer
+        return self
+
+    def set_rp(self, rp: float) -> "Transducer":
+        """
+        Set the parallel resistance (`rp`) value.
+
+        Parameters
+        ----------
+        rp : float
+            Parallel resistance in ohms. Must be positive.
+
+        Returns
+        -------
+        Transducer
+            The updated transducer instance (supports method chaining).
+
+        Raises
+        ------
+        ValueError
+            If `rp` is not positive.
+        """
+        if rp <= 0:
+            raise ValueError("Parallel resistance (rp) must be positive.")
+        self.rp = rp
+        return self
+
+    def __str__(self) -> str:
+        """
+        Return a user-friendly string representation of the transducer.
+
+        Returns
+        -------
+        str
+            A formatted string with transducer details.
+        """
+        return (
+            f"Transducer: {self.name}\n"
+            f"Manufacturer: {self.manufacturer or 'Unknown'}\n"
+            f"Rs={self.rs:.4f} Ω, Ls={self.ls:.6f} H, Cs={self.cs:.2e} F, C0={self.c0:.2e} F\n"
+            f"Resonance Frequency: {self.frequency:.2f} Hz\n"
+            f"Parallel Resistance (Rp): {self.rp if self.rp else 'None'} Ω"
+        )
 
 
-def load_transducers(json_file: str) -> Dict[str, Transducer]:
+# Default path to the JSON file containing pre-measured transducers
+DEFAULT_JSON_FILE_PATH = Path(__file__).parent / "data" / "transducers.json"
+
+
+def load_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Dict[str, Transducer]:
     """
     Load transducer data from a JSON file and create Transducer objects.
 
     Parameters
     ----------
-    json_file : str
+    json_file : str, optional
         Path to the JSON file containing transducer data.
+        Defaults to the predefined transducer data file.
 
     Returns
     -------
@@ -190,37 +192,36 @@ def load_transducers(json_file: str) -> Dict[str, Transducer]:
     # Create Transducer objects from loaded data
     return {
         name: Transducer(
-            name=name,
-            manufacturer=params.get("manufacturer"),
-            circuit_params=EquivalentCircuitParams(
-                rs=params["rs"],
-                ls=params["ls"],
-                cs=params["cs"],
-                c0=params["c0"],
-                rp=params.get("rp")  # Ensure optional rp
-            )
-        )
+            rs=params["rs"],
+            ls=params["ls"],
+            cs=params["cs"],
+            c0=params["c0"],
+            rp=params.get("rp")
+        ).set_name(name).set_manufacturer(params.get("manufacturer", "Unknown"))
         for name, params in data.items()
     }
 
 
-# Path to the JSON file containing pre-measured transducers
-_json_file_path = Path(__file__).parent / "data" / "transducers.json"
-
-# Internal dictionary for managing measured transducers
-_measured_transducers: Optional[Dict[str, Transducer]] = None
-
-
-def _load_transducers():
+def load_measured_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Dict[
+    str, Transducer]:
     """
-    Lazily load the transducer data into `_measured_transducers` if not already loaded.
+    Load and return the dictionary of predefined transducers from a JSON file.
+
+    Parameters
+    ----------
+    json_file : str, optional
+        Path to the JSON file containing transducer data.
+        Defaults to the predefined transducer data file.
+
+    Returns
+    -------
+    Dict[str, Transducer]
+        A dictionary of predefined transducer objects.
     """
-    global _measured_transducers
-    if _measured_transducers is None:
-        _measured_transducers = load_transducers(str(_json_file_path))
+    return load_transducers(json_file)
 
 
-def predefined_transducer(name: str) -> Transducer:
+def select_transducer(name: str, json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Transducer:
     """
     Retrieve a predefined transducer by its name.
 
@@ -228,6 +229,9 @@ def predefined_transducer(name: str) -> Transducer:
     ----------
     name : str
         Name of the transducer to retrieve.
+    json_file : str, optional
+        Path to the JSON file containing transducer data.
+        Defaults to the predefined transducer data file.
 
     Returns
     -------
@@ -239,21 +243,28 @@ def predefined_transducer(name: str) -> Transducer:
     ValueError
         If the specified transducer name does not exist.
     """
-    _load_transducers()  # Ensure transducers are loaded
-    if name not in _measured_transducers:
-        available = ", ".join(_measured_transducers.keys())
+    measured_transducers = load_measured_transducers(json_file)
+
+    if name not in measured_transducers:
+        available = ", ".join(measured_transducers.keys())
         raise ValueError(f"Transducer '{name}' not found. Available transducers: {available}")
-    return _measured_transducers[name]
+
+    return measured_transducers[name]
 
 
-def predefined_transducers() -> List[str]:
+def predefined_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Dict[str, Transducer]:
     """
-    Get a list of all predefined transducer names, sorted alphabetically.
+    Get a dictionary of all predefined transducers.
+
+    Parameters
+    ----------
+    json_file : str, optional
+        Path to the JSON file containing transducer data.
+        Defaults to the predefined transducer data file.
 
     Returns
     -------
-    List[str]
-        A sorted list of available transducer names.
+    Dict[str, Transducer]
+        A dictionary mapping transducer names to Transducer objects.
     """
-    _load_transducers()  # Ensure transducers are loaded
-    return sorted(_measured_transducers.keys())
+    return load_measured_transducers(json_file)

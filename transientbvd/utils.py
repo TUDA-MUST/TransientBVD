@@ -8,12 +8,10 @@ Functions include resonance frequency calculation, polynomial root solving,
 and other numerical methods used throughout the TransientBVD package.
 """
 from typing import List
-from typing import overload, Optional, Union
+from typing import overload, Optional
 
 import numpy as np
 from sympy import solve, symbols
-
-from .transducer import Transducer, EquivalentCircuitParams
 
 
 @overload
@@ -21,24 +19,11 @@ def resonance_frequency(ls: float, cs: float) -> float:
     ...
 
 
-@overload
-def resonance_frequency(rs: float, ls: float, cs: float, c0: float) -> float:
-    ...
-
-
-@overload
-def resonance_frequency(obj: Union[Transducer, EquivalentCircuitParams]) -> float:
-    ...
-
-
 def resonance_frequency(
         ls: Optional[float] = None,
-        cs: Optional[float] = None,
-        rs: Optional[float] = None,
-        c0: Optional[float] = None,
-        obj: Optional[Union[Transducer, EquivalentCircuitParams]] = None
+        cs: Optional[float] = None
 ) -> float:
-    """
+    r"""
     Calculate the resonance frequency of a system based on the Butterworth-Van Dyke (BVD) model.
 
     The resonance frequency is given by:
@@ -55,12 +40,6 @@ def resonance_frequency(
         Motional inductance in henries.
     cs : float, optional
         Motional capacitance in farads.
-    rs : float, optional
-        Series resistance in ohms.
-    c0 : float, optional
-        Parallel capacitance in farads.
-    obj : Union[Transducer, EquivalentCircuitParams], optional
-        A transducer or equivalent circuit object.
 
     Returns
     -------
@@ -69,8 +48,6 @@ def resonance_frequency(
 
     Notes
     -----
-    - If a `Transducer` or `EquivalentCircuitParams` object is provided, the function extracts
-      the necessary parameters from it.
     - Only `ls` and `cs` are used in the calculation.
 
     Raises
@@ -78,11 +55,6 @@ def resonance_frequency(
     ValueError
         If required parameters are missing or invalid.
     """
-
-    # If an object is provided, extract parameters
-    if obj is not None:
-        ls, cs = obj.ls, obj.cs
-
     # Ensure required parameters are present
     if ls is None or cs is None:
         raise ValueError(
@@ -102,20 +74,12 @@ def roots(
     ...
 
 
-@overload
-def roots(
-        obj: Union[Transducer, EquivalentCircuitParams], rp: Optional[float] = None
-) -> List[complex]:
-    ...
-
-
 def roots(
         rs: Optional[float] = None,
         ls: Optional[float] = None,
         cs: Optional[float] = None,
         c0: Optional[float] = None,
         rp: Optional[float] = None,
-        obj: Optional[Union[Transducer, EquivalentCircuitParams]] = None
 ) -> List[complex]:
     """
     Calculate the roots of the characteristic polynomial for transient response
@@ -133,9 +97,6 @@ def roots(
         Parallel capacitance in farads.
     rp : float, optional
         Parallel resistance in ohms (default: None, meaning no parallel resistance).
-    obj : Union[Transducer, EquivalentCircuitParams], optional
-        A `Transducer` or `EquivalentCircuitParams` object.
-
     Returns
     -------
     List[complex]
@@ -143,9 +104,6 @@ def roots(
 
     Notes
     -----
-    - If an object (`Transducer` or `EquivalentCircuitParams`) is provided, it extracts
-      `rs`, `ls`, `cs`, and `c0` automatically.
-    - If `rp` is passed, it overrides the object's `rp` value.
     - Uses symbolic algebra to find polynomial roots.
 
     Raises
@@ -153,11 +111,6 @@ def roots(
     ValueError
         If required parameters are missing or invalid.
     """
-
-    # Extract parameters from object if provided
-    if obj is not None:
-        rs, ls, cs, c0 = obj.rs, obj.ls, obj.cs, obj.c0
-        rp = rp if rp is not None else obj.rp  # Use given `rp`, otherwise use object's `rp`
 
     # Ensure required parameters are present
     if rs is None or ls is None or cs is None or c0 is None:
@@ -186,4 +139,3 @@ def roots(
     p_roots = solve(eq, x)
 
     return [complex(root.evalf()) for root in p_roots]  # Convert roots to complex numbers
-
