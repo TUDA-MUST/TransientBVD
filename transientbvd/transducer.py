@@ -1,9 +1,85 @@
+"""
+TransientBVD - Transducer Model
+
+This module defines the `Transducer` class, which represents an ultrasound
+transducer with predefined parameters. The transducer internally uses the
+`EquivalentCircuitParams` class to store electrical circuit parameters.
+"""
+
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from .utils import resonance_frequency
+
+
+@dataclass
+class EquivalentCircuitParams:
+    """
+    Represents the parameters of a Butterworth-Van Dyke (BVD) equivalent circuit.
+
+    Attributes
+    ----------
+    rs : float
+        Series resistance in ohms.
+    ls : float
+        Inductance in henries.
+    cs : float
+        Series capacitance in farads.
+    c0 : float
+        Parallel capacitance in farads.
+    rp : float, optional
+        Parallel resistance in ohms (default: None, meaning no parallel resistance).
+    """
+
+    rs: float
+    ls: float
+    cs: float
+    c0: float
+    rp: float = None  # Optional parallel resistance
+
+    def __repr__(self) -> str:
+        """
+        Returns a formal string representation of the object, useful for debugging.
+
+        Returns
+        -------
+        str
+            A detailed string representation of the circuit parameters.
+        """
+        return (f"EquivalentCircuitParams(rs={self.rs}, ls={self.ls}, cs={self.cs}, "
+                f"c0={self.c0}, rp={self.rp})")
+
+    def __str__(self) -> str:
+        """
+        Returns a user-friendly string representation of the circuit parameters.
+
+        Returns
+        -------
+        str
+            A readable summary of the equivalent circuit parameters.
+        """
+        return (f"Equivalent Circuit Parameters:\n"
+                f"  - Series Resistance (Rs): {self.rs:.2f} Ω\n"
+                f"  - Inductance (Ls): {self.ls:.6e} H\n"
+                f"  - Series Capacitance (Cs): {self.cs:.6e} F\n"
+                f"  - Parallel Capacitance (C0): {self.c0:.6e} F\n"
+                f"  - Parallel Resistance (Rp): {self.rp if self.rp else 'None'} Ω")
+
+    def pretty_print(self) -> None:
+        """
+        Prints the circuit parameters in a well-formatted way.
+        """
+        print("=" * 50)
+        print(" Butterworth-Van Dyke Equivalent Circuit ")
+        print("=" * 50)
+        print(f"Series Resistance (Rs): {self.rs:.2f} Ω")
+        print(f"Inductance (Ls): {self.ls:.6e} H")
+        print(f"Series Capacitance (Cs): {self.cs:.6e} F")
+        print(f"Parallel Capacitance (C0): {self.c0:.6e} F")
+        print(f"Parallel Resistance (Rp): {self.rp if self.rp else 'None'} Ω")
+        print("=" * 50)
 
 
 @dataclass
@@ -15,57 +91,116 @@ class Transducer:
     ----------
     name : str
         The name of the transducer.
-    rs : float
-        Series resistance in ohms.
-    ls : float
-        Inductance in henries.
-    cs : float
-        Series capacitance in farads.
-    c0 : float
-        Parallel capacitance in farads.
+    circuit_params : EquivalentCircuitParams
+        The equivalent circuit parameters representing the transducer.
     manufacturer : Optional[str]
         Manufacturer information for the transducer.
     frequency : float
         Resonance frequency of the transducer, calculated upon initialization.
     """
+
     name: str
-    rs: float
-    ls: float
-    cs: float
-    c0: float
+    circuit_params: EquivalentCircuitParams
     manufacturer: Optional[str] = None
     frequency: float = field(init=False)  # Calculated after initialization
-
-    def __str__(self) -> str:
-        """
-        Provide a human-readable string representation of the transducer.
-        """
-        details = (
-            f"Transducer: {self.name}\n"
-            f"Manufacturer: {self.manufacturer or 'Unknown'}\n"
-            f"Parameters (rs, ls, cs, c0): ({self.rs:.4f} Ω, {self.ls:.6f} H, "
-            f"{self.cs:.2e} F, {self.c0:.2e} F)\n"
-            f"Resonance Frequency: {self.frequency:.2f} Hz"
-        )
-        return details
 
     def __post_init__(self):
         """
         Calculate the resonance frequency of the transducer after initialization.
         This ensures the `frequency` attribute is always available.
         """
-        self.frequency = resonance_frequency(self.rs, self.ls, self.cs, self.c0)
+        self.frequency = resonance_frequency(
+            self.circuit_params.rs,
+            self.circuit_params.ls,
+            self.circuit_params.cs,
+            self.circuit_params.c0
+        )
 
-    def parameters(self) -> tuple:
+    def __str__(self) -> str:
+        """Return a user-friendly string representation of the transducer."""
+        return (
+            f"Transducer: {self.name}\n"
+            f"Manufacturer: {self.manufacturer or 'Unknown'}\n"
+            f"Parameters: Rs={self.rs:.4f} Ω, Ls={self.ls:.6f} H, "
+            f"Cs={self.cs:.2e} F, C0={self.c0:.2e} F\n"
+            f"Resonance Frequency: {self.frequency:.2f} Hz\n"
+            f"Parallel Resistance (Rp): {self.rp if self.rp else 'None'} Ω"
+        )
+
+    def get_circuit_params(self) -> EquivalentCircuitParams:
         """
-        Retrieve the core electrical parameters of the transducer.
+        Retrieve the full circuit parameters as an EquivalentCircuitParams object.
 
         Returns
         -------
-        tuple
-            A tuple of (rs, ls, cs, c0) representing the transducer's electrical parameters.
+        EquivalentCircuitParams
+            The transducer's circuit parameters.
         """
-        return self.rs, self.ls, self.cs, self.c0
+        return self.circuit_params
+
+    @property
+    def rs(self) -> float:
+        """Series resistance in ohms."""
+        return self.circuit_params.rs
+
+    @property
+    def ls(self) -> float:
+        """Inductance in henries."""
+        return self.circuit_params.ls
+
+    @property
+    def cs(self) -> float:
+        """Series capacitance in farads."""
+        return self.circuit_params.cs
+
+    @property
+    def c0(self) -> float:
+        """Parallel capacitance in farads."""
+        return self.circuit_params.c0
+
+    @property
+    def rp(self) -> Optional[float]:
+        """Parallel resistance in ohms (optional)."""
+        return self.circuit_params.rp
+
+    @classmethod
+    def from_parameters(
+        cls,
+        name: str,
+        rs: float,
+        ls: float,
+        cs: float,
+        c0: float,
+        rp: Optional[float] = None,
+        manufacturer: Optional[str] = None
+    ) -> "Transducer":
+        """
+        Create a `Transducer` instance directly from circuit parameters.
+
+        Parameters
+        ----------
+        name : str
+            Name of the transducer.
+        rs : float
+            Series resistance in ohms.
+        ls : float
+            Inductance in henries.
+        cs : float
+            Series capacitance in farads.
+        c0 : float
+            Parallel capacitance in farads.
+        rp : Optional[float], default=None
+            Parallel resistance in ohms.
+        manufacturer : Optional[str], default=None
+            Manufacturer information.
+
+        Returns
+        -------
+        Transducer
+            A `Transducer` instance with the specified parameters.
+        """
+        circuit_params = EquivalentCircuitParams(rs, ls, cs, c0, rp)
+        return cls(name=name, circuit_params=circuit_params, manufacturer=manufacturer)
 
 
 def load_transducers(json_file: str) -> Dict[str, Transducer]:
@@ -92,8 +227,22 @@ def load_transducers(json_file: str) -> Dict[str, Transducer]:
     json_path = Path(json_file)
     with json_path.open("r", encoding="utf-8") as file:
         data = json.load(file)  # Load data from JSON file
+
     # Create Transducer objects from loaded data
-    return {name: Transducer(**params) for name, params in data.items()}
+    return {
+        name: Transducer(
+            name=name,
+            manufacturer=params.get("manufacturer"),
+            circuit_params=EquivalentCircuitParams(
+                rs=params["rs"],
+                ls=params["ls"],
+                cs=params["cs"],
+                c0=params["c0"],
+                rp=params.get("rp")  # Ensure optional rp
+            )
+        )
+        for name, params in data.items()
+    }
 
 
 # Path to the JSON file containing pre-measured transducers
