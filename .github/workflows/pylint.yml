@@ -33,6 +33,6 @@ jobs:
 
       - name: Install Dependencies
         run: poetry install
-
-      - name: Run Pylint
-        run: poetry run pylint transientbvd --output-format=colorized
+        
+      - name: Run Pylint on ${{ matrix.submodule }}
+        run: poetry run pylint ${{ matrix.submodule }} --output-format=colorized
