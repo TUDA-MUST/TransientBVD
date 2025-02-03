@@ -1,4 +1,4 @@
-name: Pylint Badge
+name: Pylint
 
 on:
   push:
@@ -11,8 +11,8 @@ on:
       - develop
 
 jobs:
-  pylint:
-    name: Run Pylint and Generate Badge
+  lint:
+    name: Run Pylint
     runs-on: ubuntu-latest
 
     strategy:
@@ -33,17 +33,6 @@ jobs:
 
       - name: Install Dependencies
         run: poetry install
-
-      - name: Install `pylint-badge`
-        run: pip install pylint-badge
-
-      - name: Run Pylint and Generate Badge
-        run: |
-          poetry run pylint transientbvd > pylint.log || true
-          pylint-badge --input pylint.log --output pylint.svg
-
-      - name: Upload Pylint Badge
-        uses: actions/upload-artifact@v4
-        with:
-          name: pylint-badge
-          path: pylint.svg
+        
+      - name: Run Pylint
+        run: poetry run pylint transientbvd --output-format=colorized
