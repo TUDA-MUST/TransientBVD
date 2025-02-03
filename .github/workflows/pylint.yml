@@ -1,4 +1,4 @@
-name: Pylint Score
+name: Pylint Badge
 
 on:
   push:
@@ -34,15 +34,16 @@ jobs:
       - name: Install Dependencies
         run: poetry install
 
-      - name: Run Pylint and Save Score
-        run: |
-          poetry run pylint transientbvd | tee pylint.log
-          pylint_score=$(tail -n 2 pylint.log | grep -oE "[0-9]+\.[0-9]+/10" | cut -d'/' -f1)
-          echo "Pylint Score: $pylint_score"
-          echo $pylint_score > pylint_score.txt
+      - name: Install `pylint-badge`
+        run: pip install pylint-badge
 
-      - name: Upload Pylint Score
+      - name: Run Pylint and Generate Badge
+        run: |
+          poetry run pylint transientbvd > pylint.log || true
+          pylint-badge --input pylint.log --output pylint.svg
+
+      - name: Upload Pylint Badge
         uses: actions/upload-artifact@v4
         with:
-          name: pylint-score
-          path: pylint_score.txt
+          name: pylint-badge
+          path: pylint.svg
