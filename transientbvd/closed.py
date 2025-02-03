@@ -228,5 +228,3 @@ def closed_4tau(
         )
 
     return -tau * math.log(1.0 - (threshold * rs / ucw))
-
-
