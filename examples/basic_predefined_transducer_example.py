@@ -1,5 +1,4 @@
-from transientbvd import predefined_transducers, predefined_transducer
-
+from transientbvd import predefined_transducers, select_transducer
 
 # Step 1: List all predefined transducers
 print("Available predefined transducers:")
@@ -11,17 +10,25 @@ print("\n")
 
 # Step 2: Select a transducer by name and print its details
 selected_name = "SMBLTD45F40H_1"  # Change to another name if desired
-print(f"Details of selected transducer: {selected_name}")
-transducer = predefined_transducer(selected_name)
+transducer = select_transducer(selected_name)
 
 # Use __str__ to print transducer details
+print(f"Details of selected transducer:\n{transducer}")
+
+# Step 3: Print the equivalent circuit parameters using built-in pretty print
+print("\nEquivalent Circuit Parameters:")
 print(transducer)
 
-# Use .parameters() to get the transducer parameters
-print("\nCore parameters (rs, ls, cs, c0):")
-rs, ls, cs, c0 = transducer.parameters()
-print(f"  rs = {rs:.4f} Ω")
-print(f"  ls = {ls:.6f} H")
-print(f"  cs = {cs:.2e} F")
-print(f"  c0 = {c0:.2e} F")
+# Step 4: Access individual parameters (since Transducer inherits EquivalentCircuitParams)
+print("\nAccessing individual circuit parameters:")
+print(f"  rs = {transducer.rs:.4f} Ω")
+print(f"  ls = {transducer.ls:.6f} H")
+print(f"  cs = {transducer.cs:.2e} F")
+print(f"  c0 = {transducer.c0:.2e} F")
 
+# If the transducer has an optional parallel resistance (rp)
+if transducer.rp:
+    print(f"  rp = {transducer.rp:.2f} Ω")
+
+# Step 5: Print resonance frequency
+print(f"\nResonance Frequency: {transducer.frequency:.2f} Hz")

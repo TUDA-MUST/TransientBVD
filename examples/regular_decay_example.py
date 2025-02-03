@@ -1,6 +1,5 @@
-import numpy as np
 import pandas as pd
-from transientbvd import predefined_transducer
+from transientbvd import select_transducer
 
 # Define the transducer models and their numbers
 transducer_info = {
@@ -19,7 +18,7 @@ data = []
 for number, name in transducer_info.items():
     try:
         # Load the predefined transducer
-        transducer = predefined_transducer(name)
+        transducer = select_transducer(name)
 
         # Calculate decay times without using Rp
         tau_no_rp = 2 * transducer.ls / transducer.rs

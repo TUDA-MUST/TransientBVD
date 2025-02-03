@@ -1,28 +1,22 @@
 """
 plot_closed_current_example.py
 
-This script shows how to plot the closed-circuit transient current response from the
-TransientBVD library. We compare:
+This script plots the closed-circuit transient current response from the
+TransientBVD library. It compares:
 1. The overboost approach (using switching time).
 2. The default approach (only continuous-wave voltage).
-
-Place this file in your 'examples' folder, and run it as a standalone script to see the plot.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-# Typically you'd import from your library, for example:
-# from transientbvd.closed import closed_current, closed_4tau, switching_time
+from transientbvd import select_transducer
+from transientbvd.closed import closed_current, closed_4tau
 
 
 def plot_closed_current(
     timestamps: list[float],
+    transducer,
     ucw: float,
-    rs: float,
-    ls: float,
-    cs: float,
-    c0: float,
     ub: float | None = None,
     t_sw: float | None = None
 ) -> None:
@@ -35,32 +29,24 @@ def plot_closed_current(
     Adds lines for:
       - Steady-state current (horizontal)
       - 4τ time for both the overboosted and non-overboosted scenarios (vertical lines)
-      - Switching time t_sw if provided
+      - Switching time t_sw if provided.
 
     Parameters
     ----------
     timestamps : list[float]
         Time points (seconds) for evaluating the current.
+    transducer : Transducer
+        The transducer object containing the equivalent circuit parameters.
     ucw : float
         Continuous-wave voltage (volts).
-    rs : float
-        Series resistance (ohms).
-    ls : float
-        Inductance (henries).
-    cs : float
-        Series capacitance (farads).
-    c0 : float
-        Parallel capacitance (farads).
     ub : float, optional
         Overboost voltage (volts). If None, no overboost is applied.
     t_sw : float, optional
         Switching time (seconds). If None, and 'ub' is given, an optimal switching time
         can be calculated internally by `switching_time`.
     """
-    # 1) Evaluate currents for the overboost approach (if ub is given) or default apprioach
-    from transientbvd.closed import closed_current, closed_4tau
-
-    currents_overboost = [closed_current(t, ucw, rs, ls, cs, c0, ub, t_sw) for t in timestamps]
+    # 1) Evaluate currents for the overboost approach (if ub is given) or default approach
+    currents_overboost = [closed_current(t, transducer, ucw, ub, t_sw) for t in timestamps]
 
     # 2) Plot results
     plt.figure(figsize=(8, 5))
@@ -68,13 +54,13 @@ def plot_closed_current(
     plt.plot(timestamps, currents_overboost, label=label_overboost, color="b")
 
     # 3) Add the steady-state current reference
-    steady_state_current = ucw / rs
+    steady_state_current = ucw / transducer.rs
     plt.axhline(y=steady_state_current, color="r", linestyle="--", label="Steady-State Current")
 
     # 4) If ub is specified, also plot the scenario without any overboost
     if ub is not None:
         # Currents if only UCW is applied from t=0
-        currents_no_boost = [closed_current(t, ucw, rs, ls, cs, c0) for t in timestamps]
+        currents_no_boost = [closed_current(t, transducer, ucw) for t in timestamps]
         plt.plot(
             timestamps,
             currents_no_boost,
@@ -84,12 +70,12 @@ def plot_closed_current(
         )
 
     # 5) Plot the 4τ time for the overboost approach (or single approach if no ub)
-    t_4tau_overboost = closed_4tau(ucw, rs, ls, cs, c0, ub, t_sw)
+    t_4tau_overboost = closed_4tau(transducer, ucw, ub, t_sw)
     plt.axvline(x=t_4tau_overboost, color="black", linestyle="--", label="4τ (Overboost)")
 
     # 6) If ub is specified, also show the 4τ time for no overboost
     if ub is not None:
-        t_4tau_no_boost = closed_4tau(ucw, rs, ls, cs, c0)
+        t_4tau_no_boost = closed_4tau(transducer, ucw)
         plt.axvline(x=t_4tau_no_boost, color="g", linestyle="dashed", label="4τ (Only U_cw)")
 
     # 7) If switching time is given, visualize it
@@ -109,11 +95,12 @@ def main():
     """
     Demonstrates usage of the 'plot_closed_current' function.
     """
+    # Step 1: Select a predefined transducer
+    selected_name = "SMBLTD45F40H_1"
+    transducer = select_transducer(selected_name)
+    print(f"Selected Transducer:\n{transducer}\n")
+
     # Example parameters (modify as needed):
-    rs = 24.764
-    ls = 38.959e-3
-    cs = 400.33e-12
-    c0 = 3970.1e-12
     ucw = 40.0
     ub = 60.0
 
@@ -126,11 +113,8 @@ def main():
     # Run the plotting function
     plot_closed_current(
         timestamps=timestamps,
+        transducer=transducer,
         ucw=ucw,
-        rs=rs,
-        ls=ls,
-        cs=cs,
-        c0=c0,
         ub=ub,
         t_sw=t_sw
     )
