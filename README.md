@@ -3,14 +3,9 @@
 [![Documentation Status](https://readthedocs.org/projects/transientbvd/badge/?version=latest&style=flat-square)](https://transientbvd.readthedocs.io/en/latest/)
 ![Tests](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/tests.yml/badge.svg)
 ![Pylint](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/pylint.yml/badge.svg)
-<p>
 <a href="https://github.com/psf/black">
     <img alt="Code style: Black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
 </a>
-<a href="https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/actions/workflows/black.yml">
-    <img alt="Black Formatter" src="https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/actions/workflows/black.yml/badge.svg">
-</a>
-</p>
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![DOI](https://img.shields.io/badge/DOI-10.1234%2Fexample-blue.svg?style=flat-square)](https://doi.org/10.1234/example)
 
