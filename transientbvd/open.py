@@ -301,10 +301,10 @@ def optimum_resistance(
 
 
 def open_current(
-    t: float,
-    i0: float,
-    transducer: Transducer,
-    rp: Optional[float] = None
+        t: float,
+        i0: float,
+        transducer: Transducer,
+        rp: Optional[float] = None
 ) -> float:
     r"""
     Calculate the transient current \( i(t) \) for an open-circuit BVD model (3rd order),
@@ -342,27 +342,40 @@ def open_current(
     - If the system ends up with repeated roots or is effectively 2nd order, special cases
       may need to be handled separately.
     - Uses `transducer.rp` by default unless a different `rp` is explicitly provided.
+    - This function now checks that all eigenvalues have non-positive real parts;
+      if any eigenvalue has a positive real part, a ValueError is raised.
     """
     # Use transducer's rp if not explicitly provided
     rp = transducer.rp if rp is None else rp
 
     # Compute eigenvalues (roots of the characteristic equation)
-    lam1_c, lam2_c, lam3_c = map(complex, roots(transducer, rp=rp))
-
-    # Solve the 3x3 system for coefficients A, B, C
-    solution_abc = np.linalg.solve(
-        np.array([
-            [1.0, 1.0, 1.0],
-            [lam1_c, lam2_c, lam3_c],
-            [lam1_c**2, lam2_c**2, lam3_c**2]
-        ], dtype=complex),
-        np.array([i0, 0.0, 0.0], dtype=complex)
+    eigenvalues = roots(
+        transducer.rs, transducer.ls, transducer.cs, transducer.c0, rp=rp
     )
+
+    # Check that all eigenvalues have non-positive real parts (i.e. system is stable)
+    for lam in eigenvalues:
+        if lam.real > 0:
+            raise ValueError(f"Unstable system: eigenvalue {lam} has positive real part.")
+
+    # Convert eigenvalues to complex numbers explicitly
+    lam1_c, lam2_c, lam3_c = map(complex, eigenvalues)
+
+    # Solve the 3x3 system for coefficients A, B, C using the initial conditions:
+    # i(0) = A + B + C = i0,  i'(0) = lam1 A + lam2 B + lam3 C = 0, and
+    # i''(0) = lam1^2 A + lam2^2 B + lam3^2 C = 0.
+    matrix = np.array([
+        [1.0, 1.0, 1.0],
+        [lam1_c, lam2_c, lam3_c],
+        [lam1_c ** 2, lam2_c ** 2, lam3_c ** 2]
+    ], dtype=complex)
+    rhs = np.array([i0, 0.0, 0.0], dtype=complex)
+    solution_abc = np.linalg.solve(matrix, rhs)
 
     # Compute i(t) = A e^(λ1 t) + B e^(λ2 t) + C e^(λ3 t)
     i_t = sum(
         coef * cmath.exp(lam * t)
         for coef, lam in zip(solution_abc, (lam1_c, lam2_c, lam3_c))
     )
-
     return i_t.real  # Return only the real part
+
