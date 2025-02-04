@@ -378,4 +378,3 @@ def open_current(
         for coef, lam in zip(solution_abc, (lam1_c, lam2_c, lam3_c))
     )
     return i_t.real  # Return only the real part
-

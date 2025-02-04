@@ -8,6 +8,9 @@ equivalent circuit.
 
 from typing import Tuple, Optional
 import math
+
+import numpy as np
+
 from transientbvd.transducer import Transducer
 
 
@@ -68,7 +71,10 @@ def closed_potential(
     Tuple[float, float, float, float, float]
         (t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement).
     """
-    assert 0 < ucw < ub, "Invalid voltage parameters."
+    # Validate input parameters
+    assert ucw > 0, "ucw must be positive."
+    if ub <= ucw:
+        raise ValueError("ub must be greater than ucw.")
 
     t_sw = switching_time(transducer, ub, ucw)
     tau_no_boost = closed_4tau(transducer, ucw)
@@ -110,6 +116,9 @@ def closed_current(
     float
         The transient current at time `t`.
     """
+
+    assert t >= 0, "Time must be non-negative."
+
     # Extract circuit parameters
     rs, ls, cs = transducer.rs, transducer.ls, transducer.cs
 
@@ -117,9 +126,14 @@ def closed_current(
     assert ucw > 0, "ucw must be positive."
     assert rs > 0 and ls > 0 and cs > 0, "Circuit parameters must be positive."
 
+    if t == np.inf:
+        return abs(ucw / rs)
+
     if ub is not None:
         assert ub > ucw, "ub must be greater than ucw."
     if t_sw is not None:
+        if ub is None:
+            raise ValueError("t_sw cannot be provided without ub.")
         assert t_sw > 0, "t_sw must be positive."
 
     # Compute switching time if needed
@@ -173,7 +187,10 @@ def switching_time(
     """
     rs, ls = transducer.rs, transducer.ls
 
-    assert ub > ucw, "ub must be greater than ucw."
+    assert ucw > 0, "ucw must be positive."
+    assert ub > 0, "ub must be positive."
+    if ub <= ucw:
+        raise ValueError("ub must be greater than ucw.")
     assert rs > 0 and ls > 0, "Circuit parameters must be positive."
 
     tau = 2.0 * ls / rs
@@ -210,6 +227,10 @@ def closed_4tau(
 
     assert ucw > 0, "ucw must be positive."
     assert rs > 0 and ls > 0 and cs > 0, "Circuit parameters must be positive."
+    if ub is not None:
+        assert ub > 0, "ub must be positive."
+        if ub <= ucw:
+            raise ValueError("ub must be greater than ucw.")
 
     if ub is not None and t_sw is None:
         t_sw = switching_time(transducer, ub, ucw)
