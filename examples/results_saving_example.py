@@ -3,12 +3,16 @@ import numpy as np
 from transientbvd import Transducer, open_tau
 
 # Step 1: Create a transducer directly in the code
-transducer = Transducer(
-    rs=24.764,  # Series resistance in ohms
-    ls=38.959e-3,  # Inductance in henries
-    cs=400.33e-12,  # Series capacitance in farads
-    c0=3970.1e-12  # Parallel capacitance in farads
-).set_name("ExampleTransducer").set_manufacturer("Example Manufacturer")
+transducer = (
+    Transducer(
+        rs=24.764,  # Series resistance in ohms
+        ls=38.959e-3,  # Inductance in henries
+        cs=400.33e-12,  # Series capacitance in farads
+        c0=3970.1e-12,  # Parallel capacitance in farads
+    )
+    .set_name("ExampleTransducer")
+    .set_manufacturer("Example Manufacturer")
+)
 
 print("Transducer used for analysis:")
 print(transducer)
@@ -18,10 +22,9 @@ resistance_range = np.linspace(10, 1000, 50)  # 50 points between 10 and 1000 oh
 decay_times = [open_tau(transducer, rp=rp) for rp in resistance_range]
 
 # Create a DataFrame to store the results
-decay_df = pd.DataFrame({
-    "Resistance (Ohms)": resistance_range,
-    "Decay Time (s)": decay_times
-})
+decay_df = pd.DataFrame(
+    {"Resistance (Ohms)": resistance_range, "Decay Time (s)": decay_times}
+)
 
 # Print the first few rows of the analysis
 print("\nDecay Analysis Results:")

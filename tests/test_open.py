@@ -6,7 +6,12 @@ from unittest.mock import patch
 import numpy as np
 
 from transientbvd import (
-    open_tau, open_two_tau, optimum_resistance, open_potential, print_open_potential, open_current
+    open_tau,
+    open_two_tau,
+    optimum_resistance,
+    open_potential,
+    print_open_potential,
+    open_current,
 )
 from transientbvd.transducer import Transducer
 
@@ -18,8 +23,7 @@ class TestPrintOpenPotential(unittest.TestCase):
     def test_print_open_potential(self, mock_print):
         """Test that print_open_potential runs without errors."""
         transducer = Transducer(
-            name="TestTransducer",
-            rs=21.05, ls=35.15e-3, cs=448.62e-12, c0=4075.69e-12
+            name="TestTransducer", rs=21.05, ls=35.15e-3, cs=448.62e-12, c0=4075.69e-12
         )
         resistance_range = (10, 5000)  # Resistance range in ohms
 
@@ -34,14 +38,13 @@ class TestOpenPotentialMethod(unittest.TestCase):
     def test_open_potential_basic_case(self):
         """Test open_potential with valid parameters."""
         transducer = Transducer(
-            name="TestTransducer",
-            rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
+            name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
         resistance_range = (10, 5000)  # Resistance range in ohms
 
         # Calculate potential improvement
-        optimal_resistance, tau_with_rp, delta_time, percentage_improvement = open_potential(
-            transducer, resistance_range
+        optimal_resistance, tau_with_rp, delta_time, percentage_improvement = (
+            open_potential(transducer, resistance_range)
         )
 
         # Assert values are reasonable and within expected ranges
@@ -56,8 +59,7 @@ class TestDecayTimeMethod(unittest.TestCase):
     def test_open_tau_without_rp(self):
         """Test tau decay time calculation without a parallel resistance (rp=None)."""
         transducer = Transducer(
-            name="TestTransducer",
-            rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
+            name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
         # Calculate decay time without rp
@@ -74,8 +76,7 @@ class TestOptimumResistance(unittest.TestCase):
     def test_optimum_resistance_basic(self):
         """Test optimum resistance calculation with valid parameters."""
         transducer = Transducer(
-            name="TestTransducer",
-            rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
+            name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
         resistance_range = (10, 1000)  # Resistance range in ohms
 
@@ -97,7 +98,7 @@ class TestOpenCurrent(unittest.TestCase):
             ls=35.15e-3,
             cs=448.62e-12,
             c0=4075.69e-12,
-            rp=1000  # Default resistance
+            rp=1000,  # Default resistance
         )
 
     def test_open_current_t_zero(self):
@@ -142,12 +143,7 @@ class TestOpenCurrent(unittest.TestCase):
     def test_open_current_known_case_long_time(self):
         """Test open_current for known transducer values at t=100ms (should decay to near zero)."""
         transducer = Transducer(
-            name="RealTransducer2",
-            rs=15.0,
-            ls=20e-3,
-            cs=600e-12,
-            c0=4e-9,
-            rp=1500
+            name="RealTransducer2", rs=15.0, ls=20e-3, cs=600e-12, c0=4e-9, rp=1500
         )
         i0 = 1.0
         t = 100e-3  # 100ms

@@ -7,6 +7,7 @@ modeled by the Butterworth-Van Dyke (BVD) equivalent circuit in an open-circuit 
 It includes methods for evaluating decay times, optimizing parallel resistance for damping,
 and computing transient currents using the system's characteristic polynomial.
 """
+
 import cmath
 import logging
 from typing import Optional
@@ -20,8 +21,7 @@ from .utils import roots
 
 
 def print_open_potential(
-    transducer: Transducer,
-    resistance_range: Tuple[float, float] = (10, 5000)
+    transducer: Transducer, resistance_range: Tuple[float, float] = (10, 5000)
 ) -> None:
     """
     Display the results of `open_potential`, including decay times and speed improvement.
@@ -39,8 +39,8 @@ def print_open_potential(
         Default is (10, 5000) Ω.
     """
     # Evaluate the open_potential
-    optimal_resistance, tau_with_rp, delta_time, percentage_improvement = open_potential(
-        transducer, resistance_range
+    optimal_resistance, tau_with_rp, delta_time, percentage_improvement = (
+        open_potential(transducer, resistance_range)
     )
 
     # Extract circuit parameters directly from the Transducer object
@@ -76,8 +76,7 @@ def print_open_potential(
 
 
 def open_potential(
-    transducer: Transducer,
-    resistance_range: Tuple[float, float] = (10, 5000)
+    transducer: Transducer, resistance_range: Tuple[float, float] = (10, 5000)
 ) -> Tuple[float, float, float, float]:
     r"""
     Evaluate the improvement in transient decay time when using the optimal parallel resistance
@@ -128,7 +127,9 @@ def open_potential(
     if resistance_range[0] <= 0 or resistance_range[1] <= 0:
         raise ValueError("Resistance range bounds must contain positive values.")
     if resistance_range[0] >= resistance_range[1]:
-        raise ValueError("Resistance range lower bound must be less than the upper bound.")
+        raise ValueError(
+            "Resistance range lower bound must be less than the upper bound."
+        )
 
     # Calculate the decay time without using rp (τ = 2L / R)
     tau_no_rp = 2 * ls / rs
@@ -143,10 +144,7 @@ def open_potential(
     return optimal_resistance, tau_with_rp, delta_time, percentage_improvement
 
 
-def open_tau(
-    transducer: Transducer,
-    rp: Optional[float] = None
-) -> float:
+def open_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
     """
     Calculate the decay time (τ) for a given transducer with an optional parallel resistance (rp).
 
@@ -175,7 +173,12 @@ def open_tau(
       the characteristic polynomial.
     """
     # Validate input parameters
-    if transducer.rs <= 0 or transducer.ls <= 0 or transducer.cs <= 0 or transducer.c0 <= 0:
+    if (
+        transducer.rs <= 0
+        or transducer.ls <= 0
+        or transducer.cs <= 0
+        or transducer.c0 <= 0
+    ):
         raise ValueError("All transducer parameters (rs, ls, cs, c0) must be positive.")
     if rp is not None and rp <= 0:
         raise ValueError("rp must be positive if provided.")
@@ -193,10 +196,7 @@ def open_tau(
     return 1 / decay_rate if decay_rate > 0 else float("inf")
 
 
-def open_two_tau(
-    transducer: Transducer,
-    rp: Optional[float] = None
-) -> float:
+def open_two_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
     """
     Calculate twice the decay time (2τ) for a given transducer with an
     optional parallel resistance (rp).
@@ -229,8 +229,7 @@ def open_two_tau(
 
 
 def optimum_resistance(
-    transducer: Transducer,
-    resistance_range: Tuple[float, float] = (10, 10_000)
+    transducer: Transducer, resistance_range: Tuple[float, float] = (10, 10_000)
 ) -> Tuple[float, float]:
     """
     Calculate the optimal parallel resistance (highest damping)
@@ -258,13 +257,20 @@ def optimum_resistance(
         or if resistance bounds are invalid.
     """
     # Validate input parameters
-    if transducer.rs <= 0 or transducer.ls <= 0 or transducer.cs <= 0 or transducer.c0 <= 0:
+    if (
+        transducer.rs <= 0
+        or transducer.ls <= 0
+        or transducer.cs <= 0
+        or transducer.c0 <= 0
+    ):
         raise ValueError("All transducer parameters (rs, ls, cs, c0) must be positive.")
 
     if resistance_range[0] <= 0 or resistance_range[1] <= 0:
         raise ValueError("Resistance bounds must be positive.")
     if resistance_range[0] >= resistance_range[1]:
-        raise ValueError("Resistance range must have a lower bound less than the upper bound.")
+        raise ValueError(
+            "Resistance range must have a lower bound less than the upper bound."
+        )
 
     def decay_time_wrapper(rp: float) -> float:
         """
@@ -276,7 +282,7 @@ def optimum_resistance(
     result = minimize_scalar(
         decay_time_wrapper,
         bounds=resistance_range,
-        method="bounded"  # Use bounded optimization since we have a range
+        method="bounded",  # Use bounded optimization since we have a range
     )
 
     # Extract optimal resistance and corresponding decay time
@@ -289,22 +295,21 @@ def optimum_resistance(
     if abs(optimal_resistance - lower_bound) < tolerance:
         logging.warning(
             "Hint: The optimal resistance (%.2f Ω) is near the lower bound of the range. "
-            "Consider reducing the lower bound.", optimal_resistance
+            "Consider reducing the lower bound.",
+            optimal_resistance,
         )
     elif abs(optimal_resistance - upper_bound) < tolerance:
         logging.warning(
             "Hint: The optimal resistance (%.2f Ω) is near the upper bound of the range. "
-            "Consider increasing the upper bound.", optimal_resistance
+            "Consider increasing the upper bound.",
+            optimal_resistance,
         )
 
     return optimal_resistance, minimal_decay_time
 
 
 def open_current(
-        t: float,
-        i0: float,
-        transducer: Transducer,
-        rp: Optional[float] = None
+    t: float, i0: float, transducer: Transducer, rp: Optional[float] = None
 ) -> float:
     r"""
     Calculate the transient current \( i(t) \) for an open-circuit BVD model (3rd order),
@@ -356,7 +361,9 @@ def open_current(
     # Check that all eigenvalues have non-positive real parts (i.e. system is stable)
     for lam in eigenvalues:
         if lam.real > 0:
-            raise ValueError(f"Unstable system: eigenvalue {lam} has positive real part.")
+            raise ValueError(
+                f"Unstable system: eigenvalue {lam} has positive real part."
+            )
 
     # Convert eigenvalues to complex numbers explicitly
     lam1_c, lam2_c, lam3_c = map(complex, eigenvalues)
@@ -364,11 +371,10 @@ def open_current(
     # Solve the 3x3 system for coefficients A, B, C using the initial conditions:
     # i(0) = A + B + C = i0,  i'(0) = lam1 A + lam2 B + lam3 C = 0, and
     # i''(0) = lam1^2 A + lam2^2 B + lam3^2 C = 0.
-    matrix = np.array([
-        [1.0, 1.0, 1.0],
-        [lam1_c, lam2_c, lam3_c],
-        [lam1_c ** 2, lam2_c ** 2, lam3_c ** 2]
-    ], dtype=complex)
+    matrix = np.array(
+        [[1.0, 1.0, 1.0], [lam1_c, lam2_c, lam3_c], [lam1_c**2, lam2_c**2, lam3_c**2]],
+        dtype=complex,
+    )
     rhs = np.array([i0, 0.0, 0.0], dtype=complex)
     solution_abc = np.linalg.solve(matrix, rhs)
 

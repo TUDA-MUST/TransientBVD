@@ -18,7 +18,7 @@ def plot_closed_current(
     transducer,
     ucw: float,
     ub: float | None = None,
-    t_sw: float | None = None
+    t_sw: float | None = None,
 ) -> None:
     """
     Plot the transient current response over time for a closed circuit using the BVD model.
@@ -46,16 +46,24 @@ def plot_closed_current(
         can be calculated internally by `switching_time`.
     """
     # 1) Evaluate currents for the overboost approach (if ub is given) or default approach
-    currents_overboost = [closed_current(t, transducer, ucw, ub, t_sw) for t in timestamps]
+    currents_overboost = [
+        closed_current(t, transducer, ucw, ub, t_sw) for t in timestamps
+    ]
 
     # 2) Plot results
     plt.figure(figsize=(8, 5))
-    label_overboost = "Transient Current using overboost" if ub else "Transient Current (No Overboost)"
+    label_overboost = (
+        "Transient Current using overboost"
+        if ub
+        else "Transient Current (No Overboost)"
+    )
     plt.plot(timestamps, currents_overboost, label=label_overboost, color="b")
 
     # 3) Add the steady-state current reference
     steady_state_current = ucw / transducer.rs
-    plt.axhline(y=steady_state_current, color="r", linestyle="--", label="Steady-State Current")
+    plt.axhline(
+        y=steady_state_current, color="r", linestyle="--", label="Steady-State Current"
+    )
 
     # 4) If ub is specified, also plot the scenario without any overboost
     if ub is not None:
@@ -66,17 +74,21 @@ def plot_closed_current(
             currents_no_boost,
             label="Transient Current (Only U_cw)",
             color="orange",
-            linestyle="dashed"
+            linestyle="dashed",
         )
 
     # 5) Plot the 4τ time for the overboost approach (or single approach if no ub)
     t_4tau_overboost = closed_4tau(transducer, ucw, ub, t_sw)
-    plt.axvline(x=t_4tau_overboost, color="black", linestyle="--", label="4τ (Overboost)")
+    plt.axvline(
+        x=t_4tau_overboost, color="black", linestyle="--", label="4τ (Overboost)"
+    )
 
     # 6) If ub is specified, also show the 4τ time for no overboost
     if ub is not None:
         t_4tau_no_boost = closed_4tau(transducer, ucw)
-        plt.axvline(x=t_4tau_no_boost, color="g", linestyle="dashed", label="4τ (Only U_cw)")
+        plt.axvline(
+            x=t_4tau_no_boost, color="g", linestyle="dashed", label="4τ (Only U_cw)"
+        )
 
     # 7) If switching time is given, visualize it
     if t_sw is not None:
@@ -112,11 +124,7 @@ def main():
 
     # Run the plotting function
     plot_closed_current(
-        timestamps=timestamps,
-        transducer=transducer,
-        ucw=ucw,
-        ub=ub,
-        t_sw=t_sw
+        timestamps=timestamps, transducer=transducer, ucw=ucw, ub=ub, t_sw=t_sw
     )
 
 

@@ -163,7 +163,9 @@ class Transducer:
 DEFAULT_JSON_FILE_PATH = Path(__file__).parent / "data" / "transducers.json"
 
 
-def load_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Dict[str, Transducer]:
+def load_transducers(
+    json_file: str = str(DEFAULT_JSON_FILE_PATH),
+) -> Dict[str, Transducer]:
     """
     Load transducer data from a JSON file and create Transducer objects.
 
@@ -196,14 +198,17 @@ def load_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Dict[str, 
             ls=params["ls"],
             cs=params["cs"],
             c0=params["c0"],
-            rp=params.get("rp")
-        ).set_name(name).set_manufacturer(params.get("manufacturer", "Unknown"))
+            rp=params.get("rp"),
+        )
+        .set_name(name)
+        .set_manufacturer(params.get("manufacturer", "Unknown"))
         for name, params in data.items()
     }
 
 
-def load_measured_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Dict[
-    str, Transducer]:
+def load_measured_transducers(
+    json_file: str = str(DEFAULT_JSON_FILE_PATH),
+) -> Dict[str, Transducer]:
     """
     Load and return the dictionary of predefined transducers from a JSON file.
 
@@ -221,7 +226,9 @@ def load_measured_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> D
     return load_transducers(json_file)
 
 
-def select_transducer(name: str, json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Transducer:
+def select_transducer(
+    name: str, json_file: str = str(DEFAULT_JSON_FILE_PATH)
+) -> Transducer:
     """
     Retrieve a predefined transducer by its name.
 
@@ -247,12 +254,16 @@ def select_transducer(name: str, json_file: str = str(DEFAULT_JSON_FILE_PATH)) -
 
     if name not in measured_transducers:
         available = ", ".join(measured_transducers.keys())
-        raise ValueError(f"Transducer '{name}' not found. Available transducers: {available}")
+        raise ValueError(
+            f"Transducer '{name}' not found. Available transducers: {available}"
+        )
 
     return measured_transducers[name]
 
 
-def predefined_transducers(json_file: str = str(DEFAULT_JSON_FILE_PATH)) -> Dict[str, Transducer]:
+def predefined_transducers(
+    json_file: str = str(DEFAULT_JSON_FILE_PATH),
+) -> Dict[str, Transducer]:
     """
     Get a dictionary of all predefined transducers.
 

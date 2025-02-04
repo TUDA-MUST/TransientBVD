@@ -3,7 +3,11 @@ from unittest.mock import patch
 import numpy as np
 
 from transientbvd.closed import (
-    closed_potential, print_closed_potential, closed_4tau, switching_time, closed_current
+    closed_potential,
+    print_closed_potential,
+    closed_4tau,
+    switching_time,
+    closed_current,
 )
 from transientbvd.transducer import Transducer
 
@@ -14,11 +18,7 @@ class TestClosedCurrent(unittest.TestCase):
     def setUp(self):
         """Setup a default transducer for testing."""
         self.transducer = Transducer(
-            name="TestTransducer",
-            rs=24.764,
-            ls=38.959e-3,
-            cs=400.33e-12,
-            c0=3970.1e-12
+            name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
     def test_closed_current_no_overboost(self):
@@ -65,11 +65,15 @@ class TestClosedCurrent(unittest.TestCase):
 
         # ub <= ucw
         with self.assertRaises(AssertionError):
-            closed_current(t=0.001, transducer=self.transducer, ucw=40, ub=30, t_sw=0.002)
+            closed_current(
+                t=0.001, transducer=self.transducer, ucw=40, ub=30, t_sw=0.002
+            )
 
         # Negative ub
         with self.assertRaises(AssertionError):
-            closed_current(t=0.001, transducer=self.transducer, ucw=40, ub=-45, t_sw=0.002)
+            closed_current(
+                t=0.001, transducer=self.transducer, ucw=40, ub=-45, t_sw=0.002
+            )
 
         # t_sw given but no ub
         with self.assertRaises(ValueError):
@@ -82,11 +86,7 @@ class TestSwitchingTime(unittest.TestCase):
     def setUp(self):
         """Setup transducer for switching time tests."""
         self.transducer = Transducer(
-            name="SwitchTest",
-            rs=24.764,
-            ls=38.959e-3,
-            cs=400.33e-12,
-            c0=3970.1e-12
+            name="SwitchTest", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
     def test_switching_time_basic(self):
@@ -116,11 +116,7 @@ class TestClosed4Tau(unittest.TestCase):
     def setUp(self):
         """Setup transducer for closed_4tau tests."""
         self.transducer = Transducer(
-            name="TauTest",
-            rs=24.764,
-            ls=38.959e-3,
-            cs=400.33e-12,
-            c0=3970.1e-12
+            name="TauTest", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
     def test_closed_4tau_no_overboost(self):
@@ -156,11 +152,7 @@ class TestClosedPotential(unittest.TestCase):
     def setUp(self):
         """Setup transducer for closed_potential tests."""
         self.transducer = Transducer(
-            name="PotentialTest",
-            rs=24.764,
-            ls=38.959e-3,
-            cs=400.33e-12,
-            c0=3970.1e-12
+            name="PotentialTest", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
     def test_closed_potential_basic(self):
@@ -168,8 +160,8 @@ class TestClosedPotential(unittest.TestCase):
         ucw = 40.0
         ub = 60.0
 
-        t_sw, tau_no_boost, tau_with_boost, delta_time, pct_improvement = closed_potential(
-            self.transducer, ucw, ub
+        t_sw, tau_no_boost, tau_with_boost, delta_time, pct_improvement = (
+            closed_potential(self.transducer, ucw, ub)
         )
         self.assertGreater(t_sw, 0)
         self.assertGreater(tau_no_boost, 0)

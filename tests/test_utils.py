@@ -9,10 +9,10 @@ from transientbvd.utils import resonance_frequency, roots
 class TestRootsMethod(unittest.TestCase):
     def setUp(self):
         """Setup default parameters for tests."""
-        self.rs = 24.764       # ohms
-        self.ls = 38.959e-3    # henries
-        self.cs = 400.33e-12   # farads
-        self.c0 = 3970.1e-12   # farads
+        self.rs = 24.764  # ohms
+        self.ls = 38.959e-3  # henries
+        self.cs = 400.33e-12  # farads
+        self.c0 = 3970.1e-12  # farads
 
     def test_valid_roots_no_rp(self):
         """Test roots calculation without parallel resistance (rp=None)."""

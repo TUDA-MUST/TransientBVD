@@ -8,7 +8,7 @@ transducer_info = {
     3: "GB-4540-4SH",
     4: "SMBLTD45F40H_1",
     5: "MA40S4S",
-    6: "SMBLTD45F28H_28kHz"
+    6: "SMBLTD45F28H_28kHz",
 }
 
 # Data storage for export
@@ -25,15 +25,17 @@ for number, name in transducer_info.items():
         two_tau_no_rp = 2 * tau_no_rp
 
         # Store data for export
-        data.append({
-            "Transducer Number": number,
-            "Model": name,
-            "Rs (Ω)": transducer.rs,
-            "Ls (mH)": transducer.ls * 1e3,  # Convert H to mH
-            "Cs (pF)": transducer.cs * 1e12,  # Convert F to pF
-            "C0 (pF)": transducer.c0 * 1e12,  # Convert F to pF
-            "Two Tau (ms)": two_tau_no_rp * 1e3  # Convert s to ms
-        })
+        data.append(
+            {
+                "Transducer Number": number,
+                "Model": name,
+                "Rs (Ω)": transducer.rs,
+                "Ls (mH)": transducer.ls * 1e3,  # Convert H to mH
+                "Cs (pF)": transducer.cs * 1e12,  # Convert F to pF
+                "C0 (pF)": transducer.c0 * 1e12,  # Convert F to pF
+                "Two Tau (ms)": two_tau_no_rp * 1e3,  # Convert s to ms
+            }
+        )
 
     except Exception as e:
         print(f"Error processing {name}: {e}")

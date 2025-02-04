@@ -7,6 +7,7 @@ of resonant circuits modeled by the Butterworth-Van Dyke (BVD) equivalent circui
 Functions include resonance frequency calculation, polynomial root solving,
 and other numerical methods used throughout the TransientBVD package.
 """
+
 from typing import List
 from typing import overload, Optional
 
@@ -15,13 +16,11 @@ from sympy import solve, symbols
 
 
 @overload
-def resonance_frequency(ls: float, cs: float) -> float:
-    ...
+def resonance_frequency(ls: float, cs: float) -> float: ...
 
 
 def resonance_frequency(
-        ls: Optional[float] = None,
-        cs: Optional[float] = None
+    ls: Optional[float] = None, cs: Optional[float] = None
 ) -> float:
     r"""
     Calculate the resonance frequency of a system based on the Butterworth-Van Dyke (BVD) model.
@@ -59,7 +58,8 @@ def resonance_frequency(
     if ls is None or cs is None:
         raise ValueError(
             "Both 'ls' and 'cs' must be provided directly or "
-            "via a Transducer/EquivalentCircuitParams object.")
+            "via a Transducer/EquivalentCircuitParams object."
+        )
     if ls <= 0 or cs <= 0:
         raise ValueError("Both 'ls' and 'cs' must be positive.")
 
@@ -69,17 +69,16 @@ def resonance_frequency(
 
 @overload
 def roots(
-        rs: float, ls: float, cs: float, c0: float, rp: Optional[float] = None
-) -> List[complex]:
-    ...
+    rs: float, ls: float, cs: float, c0: float, rp: Optional[float] = None
+) -> List[complex]: ...
 
 
 def roots(
-        rs: Optional[float] = None,
-        ls: Optional[float] = None,
-        cs: Optional[float] = None,
-        c0: Optional[float] = None,
-        rp: Optional[float] = None,
+    rs: Optional[float] = None,
+    ls: Optional[float] = None,
+    cs: Optional[float] = None,
+    c0: Optional[float] = None,
+    rp: Optional[float] = None,
 ) -> List[complex]:
     r"""
     Calculate the roots of the characteristic polynomial for the transient response
@@ -129,7 +128,8 @@ def roots(
     # Ensure required parameters are provided
     if rs is None or ls is None or cs is None or c0 is None:
         raise ValueError(
-            "All parameters (rs, ls, cs, c0) must be provided directly or via an object.")
+            "All parameters (rs, ls, cs, c0) must be provided directly or via an object."
+        )
 
     # Validate parameter values
     if rs <= 0 or ls <= 0 or cs <= 0 or c0 <= 0:
@@ -148,8 +148,8 @@ def roots(
         a0 = 1 / (cs * ls * c0)
 
     # Construct the characteristic polynomial: x^3 + a2 * x^2 + a1 * x + a0 = 0
-    x = symbols('x')
-    eq = x ** 3 + a2 * x ** 2 + a1 * x + a0
+    x = symbols("x")
+    eq = x**3 + a2 * x**2 + a1 * x + a0
 
     # Solve for the roots and return them as complex numbers
     p_roots = solve(eq, x)

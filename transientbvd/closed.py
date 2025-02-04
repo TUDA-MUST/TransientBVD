@@ -14,11 +14,7 @@ import numpy as np
 from transientbvd.transducer import Transducer
 
 
-def print_closed_potential(
-    transducer: Transducer,
-    ucw: float,
-    ub: float
-) -> None:
+def print_closed_potential(transducer: Transducer, ucw: float, ub: float) -> None:
     """
     Pretty print the results of the closed-circuit overboosting potential analysis.
 
@@ -31,8 +27,8 @@ def print_closed_potential(
     ub : float
         Overboost voltage amplitude in volts.
     """
-    t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement = closed_potential(
-        transducer, ucw, ub
+    t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement = (
+        closed_potential(transducer, ucw, ub)
     )
 
     print("=" * 50)
@@ -42,17 +38,19 @@ def print_closed_potential(
     print(transducer)
 
     print(f"Switching Time (t_sw): {t_sw:.6f} s ({t_sw * 1e3:.2f} ms)")
-    print(f"4τ without Overboosting: {tau_no_boost:.6f} s ({tau_no_boost * 1e3:.2f} ms)")
-    print(f"4τ with Overboosting: {tau_with_boost:.6f} s ({tau_with_boost * 1e3:.2f} ms)")
+    print(
+        f"4τ without Overboosting: {tau_no_boost:.6f} s ({tau_no_boost * 1e3:.2f} ms)"
+    )
+    print(
+        f"4τ with Overboosting: {tau_with_boost:.6f} s ({tau_with_boost * 1e3:.2f} ms)"
+    )
     print(f"Absolute Time Improvement: {delta_time:.6f} s ({delta_time * 1e3:.2f} ms)")
     print(f"Percentage Time Improvement: {percentage_improvement:.2f}%")
     print("=" * 50)
 
 
 def closed_potential(
-    transducer: Transducer,
-    ucw: float,
-    ub: float
+    transducer: Transducer, ucw: float, ub: float
 ) -> Tuple[float, float, float, float, float]:
     """
     Evaluate the potential improvement in transient response time when using overboosting.
@@ -81,7 +79,9 @@ def closed_potential(
     tau_with_boost = closed_4tau(transducer, ucw, ub, t_sw)
 
     delta_time = tau_no_boost - tau_with_boost
-    percentage_improvement = (delta_time / tau_no_boost) * 100 if tau_no_boost > 0 else 0.0
+    percentage_improvement = (
+        (delta_time / tau_no_boost) * 100 if tau_no_boost > 0 else 0.0
+    )
 
     return t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement
 
@@ -91,7 +91,7 @@ def closed_current(
     transducer: Transducer,
     ucw: float,
     ub: Optional[float] = None,
-    t_sw: Optional[float] = None
+    t_sw: Optional[float] = None,
 ) -> float:
     """
     Compute the transient current response for a closed circuit (BVD model).
@@ -151,23 +151,16 @@ def closed_current(
         # else t >= t_sw
         amp_t_sw = (ub / rs) * (1 - math.exp(-t_sw / tau))
         phase_offset = w_r * t_sw
-        return (
-            amp_t_sw
-            * math.exp(-(t - t_sw) / tau)
-            * math.cos(w_r * (t - t_sw) + phase_offset)
-            + (ucw / rs)
-            * math.cos(w_r * (t - t_sw) + phase_offset)
-            * (1 - math.exp(-(t - t_sw) / tau))
+        return amp_t_sw * math.exp(-(t - t_sw) / tau) * math.cos(
+            w_r * (t - t_sw) + phase_offset
+        ) + (ucw / rs) * math.cos(w_r * (t - t_sw) + phase_offset) * (
+            1 - math.exp(-(t - t_sw) / tau)
         )
 
     return (ucw / rs) * math.cos(w_r * t) * (1 - math.exp(-t / tau))
 
 
-def switching_time(
-    transducer: Transducer,
-    ub: float,
-    ucw: float
-) -> float:
+def switching_time(transducer: Transducer, ub: float, ucw: float) -> float:
     """
     Calculate the switching time for the transient response.
 
@@ -201,7 +194,7 @@ def closed_4tau(
     transducer: Transducer,
     ucw: float,
     ub: Optional[float] = None,
-    t_sw: Optional[float] = None
+    t_sw: Optional[float] = None,
 ) -> float:
     """
     Calculate the time at which the oscillation amplitude first reaches

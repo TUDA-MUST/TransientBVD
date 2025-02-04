@@ -9,10 +9,14 @@ print(f"Selected Transducer:\n{transducer}\n")
 resistance_range = (10, 5000)  # Resistance range in ohms
 
 # Step 3: Calculate the optimum resistance
-optimal_resistance, minimal_decay_time = optimum_resistance(transducer, resistance_range)
+optimal_resistance, minimal_decay_time = optimum_resistance(
+    transducer, resistance_range
+)
 
 # Step 4: Display the results
 print("Optimal Resistance Calculation:")
 print(f"  Resistance Range: {resistance_range[0]} Ω to {resistance_range[1]} Ω")
 print(f"  Optimal Resistance: {optimal_resistance:.2f} Ω")
-print(f"  Minimal Decay Time: {minimal_decay_time:.6f} s ({minimal_decay_time * 1e3:.2f} ms)")
+print(
+    f"  Minimal Decay Time: {minimal_decay_time:.6f} s ({minimal_decay_time * 1e3:.2f} ms)"
+)
