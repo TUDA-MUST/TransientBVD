@@ -8,25 +8,27 @@ authors = [
     "Mario Kupnik <mario.kupnik@tu-darmstadt.de>"
 ]
 maintainers = [
-    "Jan Helge Döersam <jan_helge.doersam@tu-darmstadt.de>"
+    "Jan Helge Dörsam <jan_helge.doersam@tu-darmstadt.de>"
 ]
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/jhd-old/TransientBVD"
 repository = "https://github.com/jhd-old/TransientBVD"
-keywords = ["BVD", "transient response", "rapid", "analysis", "optimization", "Butterworth-Van Dyke", "circuit"]
+keywords = ["BVD", "transient response", "rapid", "analysis", "optimization", "Butterworth-Van Dyke", "circuit", "ultrasound", "transducer", "ultrasonic", "step response"]
 classifiers = [
+    "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-include = ["transientbvd/data/*.json"]
 
+include = ["LICENSE", "transientbvd/data/*.json"]
+packages = [{ include = "transientbvd" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -43,6 +45,7 @@ pylint = "^3.3.4"
 pytest = "^8.3.4"
 black = "^25.1.0"
 pre-commit = "^4.1.0"
+myst-parser = "^4.0.0"
 
 [build-system]
 requires = ["poetry-core"]
