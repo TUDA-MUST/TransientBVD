@@ -37,7 +37,7 @@ If you find **TransientBVD** helpful in your academic work, please cite:
 ```bibtex
 @article{doersamTransientBVD2025,
   title     = {Rapid Transient Control Strategies for Ultrasound Transducers},
-  author    = {Dörsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Soennecken, Soeren and Wismath, Sonja and Harth, Anne and Heyl, Christoph and Kupnik, Mario},
+  author    = {Dörsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schrödel, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Soeren and Heyl, Christoph and Kupnik, Mario},
   journal   = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
   year      = {2025},
   volume    = {??},
