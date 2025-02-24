@@ -50,7 +50,7 @@
     "Custom": {
         "name": "Custom",
         "rs": 3.50,
-        "ls": 0.029,
+        "ls": 0.000029,
         "cs": 3.39e-9,
         "c0": 1.2e-8,
         "manufacturer": "Inoson, St. Ingbert, DE"

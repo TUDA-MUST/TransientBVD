@@ -53,15 +53,11 @@ def print_open_potential(
     # Calculate 2τ for Rp
     two_tau_with_rp = 2 * tau_with_rp
 
-    # Calculate speed improvement factor
-    speed_improvement = tau_no_rp / tau_with_rp if tau_with_rp > 0 else float("inf")
-
     # Pretty print the results
     print("=" * 50)
     print("Open Potential Analysis")
     print("=" * 50)
 
-    # Use the pretty_print method from Transducer (inherits from EquivalentCircuitParams)
     print(transducer)
 
     print(f"Optimal Parallel Resistance (Rp): {optimal_resistance:.2f} Ω")
@@ -71,7 +67,6 @@ def print_open_potential(
     print(f"2τ with Rp: {two_tau_with_rp:.6f} s ({two_tau_with_rp * 1e3:.2f} ms)")
     print(f"Absolute Time Improvement: {delta_time:.6f} s ({delta_time * 1e3:.2f} ms)")
     print(f"Percentage Time Improvement: {percentage_improvement:.2f}%")
-    print(f"Speed Improvement Factor: {speed_improvement:.2f}x")
     print("=" * 50)
 
 
@@ -298,12 +293,16 @@ def optimum_resistance(
             "Consider reducing the lower bound.",
             optimal_resistance,
         )
+        print("Hint: The optimal resistance (%.2f Ω) is near the lower bound of the range. "
+              "Consider reducing the lower bound.", optimal_resistance)
     elif abs(optimal_resistance - upper_bound) < tolerance:
         logging.warning(
             "Hint: The optimal resistance (%.2f Ω) is near the upper bound of the range. "
             "Consider increasing the upper bound.",
             optimal_resistance,
         )
+        print("Hint: The optimal resistance (%.2f Ω) is near the upper bound of the range. "
+              "Consider increasing the upper bound.", optimal_resistance)
 
     return optimal_resistance, minimal_decay_time
 
