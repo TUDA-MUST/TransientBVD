@@ -293,16 +293,22 @@ def optimum_resistance(
             "Consider reducing the lower bound.",
             optimal_resistance,
         )
-        print("Hint: The optimal resistance (%.2f Ω) is near the lower bound of the range. "
-              "Consider reducing the lower bound.", optimal_resistance)
+        print(
+            "Hint: The optimal resistance (%.2f Ω) is near the lower bound of the range. "
+            "Consider reducing the lower bound.",
+            optimal_resistance,
+        )
     elif abs(optimal_resistance - upper_bound) < tolerance:
         logging.warning(
             "Hint: The optimal resistance (%.2f Ω) is near the upper bound of the range. "
             "Consider increasing the upper bound.",
             optimal_resistance,
         )
-        print("Hint: The optimal resistance (%.2f Ω) is near the upper bound of the range. "
-              "Consider increasing the upper bound.", optimal_resistance)
+        print(
+            "Hint: The optimal resistance (%.2f Ω) is near the upper bound of the range. "
+            "Consider increasing the upper bound.",
+            optimal_resistance,
+        )
 
     return optimal_resistance, minimal_decay_time
 
