@@ -12,8 +12,8 @@ from transientbvd.activation import (
 from transientbvd.transducer import Transducer
 
 
-class TestClosedCurrent(unittest.TestCase):
-    """Tests for the closed_current function."""
+class TestActivationCurrent(unittest.TestCase):
+    """Tests for the activation_current function."""
 
     def setUp(self):
         """Setup a default transducer for testing."""
@@ -21,8 +21,8 @@ class TestClosedCurrent(unittest.TestCase):
             name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
-    def test_closed_current_no_overboost(self):
-        """Test closed_current without overboost (ub=None)."""
+    def test_activation_current_no_overboost(self):
+        """Test activation_current without overboost (ub=None)."""
         ucw = 40.0
         t_small = 0.0005
 
@@ -35,8 +35,8 @@ class TestClosedCurrent(unittest.TestCase):
         i_inf = activation_current(t=np.inf, transducer=self.transducer, ucw=ucw)
         self.assertAlmostEqual(i_inf, ucw / self.transducer.rs, places=7)
 
-    def test_closed_current_with_overboost(self):
-        """Test closed_current with overboost."""
+    def test_activation_current_with_overboost(self):
+        """Test activation_current with overboost."""
         ucw = 30.0
         ub = 45.0
         t_sw = switching_time(self.transducer, ub, ucw)
@@ -52,12 +52,12 @@ class TestClosedCurrent(unittest.TestCase):
         i_after = activation_current(t_after, self.transducer, ucw, ub, t_sw)
         self.assertGreater(i_after, 0.0)
 
-    def test_closed_current_inf(self):
+    def test_activation_current_inf(self):
         """t = np.inf should return steady-state current: ucw / rs."""
         i_inf = activation_current(t=np.inf, transducer=self.transducer, ucw=25)
         self.assertAlmostEqual(i_inf, 25 / self.transducer.rs, places=7)
 
-    def test_closed_current_invalid_usage(self):
+    def test_activation_current_invalid_usage(self):
         """Test assertion errors for invalid inputs."""
         # Negative time
         with self.assertRaises(AssertionError):
@@ -110,16 +110,16 @@ class TestSwitchingTime(unittest.TestCase):
             switching_time(self.transducer, ub=10, ucw=-20)
 
 
-class TestClosed4Tau(unittest.TestCase):
-    """Tests for the closed_4tau function."""
+class TestActivation4Tau(unittest.TestCase):
+    """Tests for the activation_4tau function."""
 
     def setUp(self):
-        """Setup transducer for closed_4tau tests."""
+        """Setup transducer for activation_4tau tests."""
         self.transducer = Transducer(
             name="TauTest", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
-    def test_closed_4tau_no_overboost(self):
+    def test_activation_4tau_no_overboost(self):
         """No overboost => expecting a time near 4 * tau."""
         ucw = 40.0
 
@@ -127,7 +127,7 @@ class TestClosed4Tau(unittest.TestCase):
         expected_approx = 4.0 * (2 * self.transducer.ls / self.transducer.rs)
         self.assertAlmostEqual(result, expected_approx, delta=5e-4)
 
-    def test_closed_4tau_overboost(self):
+    def test_activation_4tau_overboost(self):
         """Overboost scenario: 4τ should be equal or smaller than t_sw."""
         ucw = 30.0
         ub = 60.0
@@ -138,7 +138,7 @@ class TestClosed4Tau(unittest.TestCase):
         # The transient should settle equal or before t_sw
         self.assertLessEqual(res, t_sw)
 
-    def test_closed_4tau_assertions(self):
+    def test_activation_4tau_assertions(self):
         """Negative or zero parameters => AssertionError, ub <= ucw => ValueError."""
         with self.assertRaises(AssertionError):
             activation_4tau(self.transducer, ucw=-10)
@@ -146,16 +146,16 @@ class TestClosed4Tau(unittest.TestCase):
             activation_4tau(self.transducer, ucw=20, ub=10)
 
 
-class TestClosedPotential(unittest.TestCase):
-    """Tests for closed_potential and print_closed_potential."""
+class TestActivationPotential(unittest.TestCase):
+    """Tests for activation_potential and print_activation_potential."""
 
     def setUp(self):
-        """Setup transducer for closed_potential tests."""
+        """Setup transducer for activation_potential tests."""
         self.transducer = Transducer(
             name="PotentialTest", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
 
-    def test_closed_potential_basic(self):
+    def test_activation_potential_basic(self):
         """Check t_sw, tau_no_boost, tau_with_boost, delta_time, pct_improvement."""
         ucw = 40.0
         ub = 60.0
@@ -170,15 +170,15 @@ class TestClosedPotential(unittest.TestCase):
         self.assertGreater(pct_improvement, 0)
 
     @patch("builtins.print")
-    def test_print_closed_potential(self, mock_print):
-        """Ensure print_closed_potential calls print at least once."""
+    def test_print_activation_potential(self, mock_print):
+        """Ensure print_activation_potential calls print at least once."""
         ucw = 40.0
         ub = 60.0
 
         print_activation_potential(self.transducer, ucw, ub)
         self.assertTrue(mock_print.called)
 
-    def test_closed_potential_asserts(self):
+    def test_activation_potential_asserts(self):
         """Check invalid parameters trigger AssertionError or ValueError."""
         with self.assertRaises(AssertionError):
             activation_potential(self.transducer, ucw=-10, ub=60)

@@ -1,7 +1,7 @@
 """
-TransientBVD - Closed Circuit Transient Analysis
+TransientBVD - Activation Transient Analysis
 
-This module contains functions for analyzing the closed-circuit transient
+This module contains functions for analyzing the activation transient
 response of resonant circuits modeled by the Butterworth-Van Dyke (BVD)
 equivalent circuit.
 """
@@ -14,9 +14,9 @@ import numpy as np
 from transientbvd.transducer import Transducer
 
 
-def print_closed_potential(transducer: Transducer, ucw: float, ub: float) -> None:
+def print_activation_potential(transducer: Transducer, ucw: float, ub: float) -> None:
     """
-    Pretty print the results of the closed-circuit overboosting potential analysis.
+    Pretty print the results of the activation overboosting potential analysis.
 
     Parameters
     ----------
@@ -28,11 +28,11 @@ def print_closed_potential(transducer: Transducer, ucw: float, ub: float) -> Non
         Overboost voltage amplitude in volts.
     """
     t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement = (
-        closed_potential(transducer, ucw, ub)
+        activation_potential(transducer, ucw, ub)
     )
 
     print("=" * 50)
-    print("Closed-Circuit Overboosting Potential Analysis")
+    print("Activation Overboosting Potential Analysis")
     print("=" * 50)
 
     print(transducer)
@@ -49,11 +49,12 @@ def print_closed_potential(transducer: Transducer, ucw: float, ub: float) -> Non
     print("=" * 50)
 
 
-def closed_potential(
+def activation_potential(
     transducer: Transducer, ucw: float, ub: float
 ) -> Tuple[float, float, float, float, float]:
     """
-    Evaluate the potential improvement in transient response time when using overboosting.
+    Evaluate the potential improvement in transient response time when using overboosting
+    in the activation scenario.
 
     Parameters
     ----------
@@ -75,8 +76,8 @@ def closed_potential(
         raise ValueError("ub must be greater than ucw.")
 
     t_sw = switching_time(transducer, ub, ucw)
-    tau_no_boost = closed_4tau(transducer, ucw)
-    tau_with_boost = closed_4tau(transducer, ucw, ub, t_sw)
+    tau_no_boost = activation_4tau(transducer, ucw)
+    tau_with_boost = activation_4tau(transducer, ucw, ub, t_sw)
 
     delta_time = tau_no_boost - tau_with_boost
     percentage_improvement = (
@@ -86,7 +87,7 @@ def closed_potential(
     return t_sw, tau_no_boost, tau_with_boost, delta_time, percentage_improvement
 
 
-def closed_current(
+def activation_current(
     t: float,
     transducer: Transducer,
     ucw: float,
@@ -94,7 +95,7 @@ def closed_current(
     t_sw: Optional[float] = None,
 ) -> float:
     """
-    Compute the transient current response for a closed circuit (BVD model).
+    Compute the transient current response for an activation BVD model.
 
     Parameters
     ----------
@@ -162,7 +163,7 @@ def closed_current(
 
 def switching_time(transducer: Transducer, ub: float, ucw: float) -> float:
     """
-    Calculate the switching time for the transient response.
+    Calculate the switching time for the transient response in the activation scenario.
 
     Parameters
     ----------
@@ -190,7 +191,7 @@ def switching_time(transducer: Transducer, ub: float, ucw: float) -> float:
     return -tau * math.log(1.0 - (ucw / ub))
 
 
-def closed_4tau(
+def activation_4tau(
     transducer: Transducer,
     ucw: float,
     ub: Optional[float] = None,
@@ -198,7 +199,7 @@ def closed_4tau(
 ) -> float:
     """
     Calculate the time at which the oscillation amplitude first reaches
-    98.2% of the steady-state current.
+    98.2% of the steady-state current in the activation scenario.
 
     Parameters
     ----------

@@ -1,8 +1,8 @@
 """
-TransientBVD - Open Circuit Transient Analysis
+TransientBVD - Deactivation Transient Analysis
 
 This module provides functions for analyzing the transient response of resonant circuits
-modeled by the Butterworth-Van Dyke (BVD) equivalent circuit in an open-circuit scenario.
+modeled by the Butterworth-Van Dyke (BVD) equivalent circuit in a deactivation scenario.
 
 It includes methods for evaluating decay times, optimizing parallel resistance for damping,
 and computing transient currents using the system's characteristic polynomial.
@@ -20,13 +20,13 @@ from .transducer import Transducer
 from .utils import roots
 
 
-def print_open_potential(
+def print_deactivation_potential(
     transducer: Transducer, resistance_range: Tuple[float, float] = (10, 5000)
 ) -> None:
     """
-    Display the results of `open_potential`, including decay times and speed improvement.
+    Display the results of `deactivation_potential`, including decay times and speed improvement.
 
-    This function evaluates how the transient response improves when introducing an
+    This function evaluates how the deactivation transient response improves when introducing an
     optimal parallel resistance (Rp). It prints decay times with and without Rp, as well
     as the absolute and percentage improvements.
 
@@ -38,9 +38,9 @@ def print_open_potential(
         The range of resistance values (in ohms) to evaluate for optimal damping.
         Default is (10, 5000) Ω.
     """
-    # Evaluate the open_potential
+    # Evaluate the deactivation potential
     optimal_resistance, tau_with_rp, delta_time, percentage_improvement = (
-        open_potential(transducer, resistance_range)
+        deactivation_potential(transducer, resistance_range)
     )
 
     # Extract circuit parameters directly from the Transducer object
@@ -55,7 +55,7 @@ def print_open_potential(
 
     # Pretty print the results
     print("=" * 50)
-    print("Open Potential Analysis")
+    print("Deactivation Potential Analysis")
     print("=" * 50)
 
     print(transducer)
@@ -70,12 +70,12 @@ def print_open_potential(
     print("=" * 50)
 
 
-def open_potential(
+def deactivation_potential(
     transducer: Transducer, resistance_range: Tuple[float, float] = (10, 5000)
 ) -> Tuple[float, float, float, float]:
     r"""
     Evaluate the improvement in transient decay time when using the optimal parallel resistance
-    versus not using a parallel resistance in an open-circuit scenario.
+    versus not using a parallel resistance in a deactivation scenario.
 
     The method calculates the decay time for two cases:
     1. With the optimal parallel resistance, where the time constant is determined
@@ -139,7 +139,7 @@ def open_potential(
     return optimal_resistance, tau_with_rp, delta_time, percentage_improvement
 
 
-def open_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
+def deactivation_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
     """
     Calculate the decay time (τ) for a given transducer with an optional parallel resistance (rp).
 
@@ -163,7 +163,7 @@ def open_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
     Notes
     -----
     - When `rp` is not provided, the decay time is calculated using the formula:
-      τ = 2 * ls / rs (approximating an open circuit).
+      τ = 2 * ls / rs (approximating the deactivation condition).
     - When `rp` is provided, the decay time is determined using the eigenvalues of
       the characteristic polynomial.
     """
@@ -191,7 +191,7 @@ def open_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
     return 1 / decay_rate if decay_rate > 0 else float("inf")
 
 
-def open_two_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
+def deactivation_two_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
     """
     Calculate twice the decay time (2τ) for a given transducer with an
     optional parallel resistance (rp).
@@ -216,11 +216,11 @@ def open_two_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
     Notes
     -----
     - When `rp` is not provided, the decay time is calculated using the formula:
-      2τ = 4 * ls / rs (approximating an open circuit).
+      2τ = 4 * ls / rs (approximating the deactivation condition).
     - When `rp` is provided, the decay time is determined using the eigenvalues of
       the characteristic polynomial.
     """
-    return 2 * open_tau(transducer, rp)
+    return 2 * deactivation_tau(transducer, rp)
 
 
 def optimum_resistance(
@@ -235,7 +235,7 @@ def optimum_resistance(
     ----------
     transducer : Transducer
         The transducer object containing the necessary circuit parameters.
-    resistance_range : Tuple[float, float], default=(10, 10_000)
+    resistance_range : Tuple[float, float], default=(10, 10,000)
         A tuple representing the lower and upper bounds for resistance (in ohms) to evaluate.
 
     Returns
@@ -271,7 +271,7 @@ def optimum_resistance(
         """
         Wrapper for decay_time to match the signature for optimization.
         """
-        return open_tau(transducer, rp=rp)
+        return deactivation_tau(transducer, rp=rp)
 
     # Perform numerical optimization to find the resistance that minimizes decay time
     result = minimize_scalar(
@@ -313,11 +313,11 @@ def optimum_resistance(
     return optimal_resistance, minimal_decay_time
 
 
-def open_current(
+def deactivation_current(
     t: float, i0: float, transducer: Transducer, rp: Optional[float] = None
 ) -> float:
     r"""
-    Calculate the transient current \( i(t) \) for an open-circuit BVD model (3rd order),
+    Calculate the transient current \( i(t) \) for a deactivation BVD model (3rd order),
     assuming initial conditions:
       \( i(0) = i_0 \), \( i'(0) = 0 \), \( i''(0) = 0 \).
 

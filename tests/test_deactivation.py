@@ -18,10 +18,10 @@ from transientbvd.transducer import Transducer
 logging.basicConfig(level=logging.WARNING)
 
 
-class TestPrintOpenPotential(unittest.TestCase):
+class TestPrintDeactivationPotential(unittest.TestCase):
     @patch("builtins.print")  # Mock the print function
-    def test_print_open_potential(self, mock_print):
-        """Test that print_open_potential runs without errors."""
+    def test_print_deactivation_potential(self, mock_print):
+        """Test that print_deactivation_potential runs without errors."""
         transducer = Transducer(
             name="TestTransducer", rs=21.05, ls=35.15e-3, cs=448.62e-12, c0=4075.69e-12
         )
@@ -34,9 +34,9 @@ class TestPrintOpenPotential(unittest.TestCase):
         self.assertTrue(mock_print.called)
 
 
-class TestOpenPotentialMethod(unittest.TestCase):
-    def test_open_potential_basic_case(self):
-        """Test open_potential with valid parameters."""
+class TestDeactivationPotentialMethod(unittest.TestCase):
+    def test_deactivation_potential_basic_case(self):
+        """Test deactivation_potential with valid parameters."""
         transducer = Transducer(
             name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
@@ -56,8 +56,8 @@ class TestOpenPotentialMethod(unittest.TestCase):
 
 
 class TestDecayTimeMethod(unittest.TestCase):
-    def test_open_tau_without_rp(self):
-        """Test tau decay time calculation without a parallel resistance (rp=None)."""
+    def test_deactivation_tau_without_rp(self):
+        """Test deactivation_tau calculation without a parallel resistance (rp=None)."""
         transducer = Transducer(
             name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
@@ -74,7 +74,7 @@ class TestDecayTimeMethod(unittest.TestCase):
 
 class TestOptimumResistance(unittest.TestCase):
     def test_optimum_resistance_basic(self):
-        """Test optimum resistance calculation with valid parameters."""
+        """Test optimum_resistance calculation with valid parameters."""
         transducer = Transducer(
             name="TestTransducer", rs=24.764, ls=38.959e-3, cs=400.33e-12, c0=3970.1e-12
         )
@@ -89,7 +89,7 @@ class TestOptimumResistance(unittest.TestCase):
         self.assertGreater(minimal_decay_time, 0)
 
 
-class TestOpenCurrent(unittest.TestCase):
+class TestDeactivationCurrent(unittest.TestCase):
     def setUp(self):
         """Setup default parameters for transducer tests."""
         self.transducer = Transducer(
@@ -98,50 +98,51 @@ class TestOpenCurrent(unittest.TestCase):
             ls=35.15e-3,
             cs=448.62e-12,
             c0=4075.69e-12,
-            rp=1000,  # Default resistance
+            rp=1000,  # Default parallel resistance
         )
 
-    def test_open_current_t_zero(self):
-        """Test open_current at t=0 should return exactly i0."""
+    def test_deactivation_current_t_zero(self):
+        """Test deactivation_current at t=0 should return exactly i0."""
         i0 = 1.0
         result = deactivation_current(0, i0, self.transducer)
         self.assertAlmostEqual(result, i0, places=6)
 
-    def test_open_current_large_t(self):
-        """Test open_current for large t (t → ∞) should return ~0."""
+    def test_deactivation_current_large_t(self):
+        """Test deactivation_current for large t (t → ∞) should return ~0."""
         i0 = 1.0
         result = deactivation_current(10, i0, self.transducer)  # t = 10s
         self.assertAlmostEqual(result, 0.0, places=6)
 
-    def test_open_current_zero_i0(self):
-        """Test open_current with i0=0 should always return 0."""
+    def test_deactivation_current_zero_i0(self):
+        """Test deactivation_current with i0=0 should always return 0."""
         result = deactivation_current(1e-3, 0.0, self.transducer)  # Any time value
         self.assertAlmostEqual(result, 0.0, places=6)
 
-    def test_open_current_high_resistance(self):
-        """Test open_current with very high rs to simulate open circuit."""
+    def test_deactivation_current_high_resistance(self):
+        """Test deactivation_current with very high rs to simulate deactivation condition."""
         self.transducer.rs = 1e6  # Extremely high series resistance
         i0 = 1.0
-        result = deactivation_current(10e-3, i0, self.transducer)  # t=10ms
+        result = deactivation_current(10e-3, i0, self.transducer)  # t = 10ms
         self.assertAlmostEqual(result, 0.0, delta=1e-3)  # Allow small numerical errors
 
-    def test_open_current_large_rp(self):
-        """Test open_current with a very high rp (should behave like rp=None)."""
+    def test_deactivation_current_large_rp(self):
+        """Test deactivation_current with a very high rp (should behave like rp=None)."""
         self.transducer.rp = 1e9  # Very large parallel resistance
         i0 = 1.0
         result = deactivation_current(1e-3, i0, self.transducer)
         self.assertNotEqual(result, float("inf"))
         self.assertNotEqual(result, float("nan"))
 
-    def test_open_current_unstable(self):
-        """Test open_current should raise an error if the system is unstable."""
+    def test_deactivation_current_unstable(self):
+        """Test deactivation_current should raise an error if the system is unstable."""
         self.transducer.rs = -5  # Negative resistance (non-physical case)
         i0 = 1.0
         with self.assertRaises(ValueError):
             deactivation_current(1e-3, i0, self.transducer)
 
-    def test_open_current_known_case_long_time(self):
-        """Test open_current for known transducer values at t=100ms (should decay to near zero)."""
+    def test_deactivation_current_known_case_long_time(self):
+        """Test deactivation_current for known transducer values at t=100ms
+        (should decay to near zero)."""
         transducer = Transducer(
             name="RealTransducer2", rs=15.0, ls=20e-3, cs=600e-12, c0=4e-9, rp=1500
         )
