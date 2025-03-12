@@ -7,7 +7,7 @@ TransientBVD — Transient Response Analysis
 **TransientBVD** is a Python library for analyzing and optimizing the transient
 response of ultrasound transducers (or other resonant systems) modeled by the
 Butterworth-Van Dyke (BVD) equivalent circuit. It implements advanced methods
-for both open-circuit (resistive damping) and closed-circuit (voltage overboost)
+for both deactivation (resistive damping) and activation (voltage overboost)
 strategies, significantly reducing transient response times.
 
 This library is developed at the
@@ -42,9 +42,9 @@ If you find **TransientBVD** helpful in your own research, please cite:
 
 .. code-block:: bibtex
 
-   @article{doersamSuppeltKupnik2024,
+   @article{doersamTransientBVD2024,
      title     = {Rapid Transient Control Strategies for Ultrasound Transducers},
-     author    = {Dörsam, Jan Helge and Suppelt, Sven and Kupnik, Mario},
+     author    = author    = {Dörsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schrödel, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Soeren and Heyl, Christoph and Kupnik, Mario},
      journal   = {IEEE TRANSACTIONS ON ULTRASONICS, FERROELECTRICS, AND FREQUENCY CONTROL},
      year      = {2025},
      volume    = {??},
@@ -73,12 +73,8 @@ This work was supported through multiple grants and collaborations:
    funding by Austria, Belgium, Czech Republic, Germany, Netherlands, Norway,
    and Spain).
 
-
-
 Indices and tables
 ------------------
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-

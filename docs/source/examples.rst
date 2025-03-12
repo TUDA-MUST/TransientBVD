@@ -5,7 +5,6 @@ Below are various example scripts from the ``TransientBVD/examples`` directory,
 demonstrating how to use TransientBVD in different scenarios. Each snippet is
 embedded here for convenient reference.
 
-
 Basic Example
 -------------
 A minimal script showing how to import TransientBVD and call a simple method.
@@ -22,35 +21,36 @@ Demonstrates creating a predefined transducer object and using library methods.
    :language: python
    :linenos:
 
-Decay Time Example
-------------------
-Shows how to compute decay time (τ) in different conditions.
+Deactivation Time Example
+-------------------------------
+Shows how to compute deactivation time (τ) in different conditions for deactivation.
 
-.. literalinclude:: ../../examples/decay_time_example.py
+.. literalinclude:: ../../examples/deactivation_time_example.py
    :language: python
    :linenos:
 
-Decay Time Over Rp Example
---------------------------
-Explores how decay time changes over various parallel resistance values (Rp).
+Deactivation Time Over Rp Example
+----------------------------------------
+Explores how deactivation time changes over various parallel resistance values (Rp)
+in the deactivation scenario.
 
-.. literalinclude:: ../../examples/decay_time_over_rp_example.py
+.. literalinclude:: ../../examples/deactivation_time_over_rp_example.py
    :language: python
    :linenos:
 
 Optimum Resistance Example
 --------------------------
-Uses the library’s optimization routine to find the best Rp for minimal decay.
+Uses the library’s optimization routine to find the best Rp for minimal deactivation time.
 
 .. literalinclude:: ../../examples/optimum_resistance_example.py
    :language: python
    :linenos:
 
-Plot Closed Current Example
----------------------------
-Plots the transient current response under a closed-circuit with overboost.
+Plot Activation Current Example
+-------------------------------
+Plots the transient current response under an activation scenario with overboost.
 
-.. literalinclude:: ../../examples/plot_closed_current_example.py
+.. literalinclude:: ../../examples/activation_current_plot_example.py
    :language: python
    :linenos:
 

@@ -12,7 +12,7 @@ Use Poetry or pip. Example (pip):
 
 Basic Example
 -------------
-Using open-circuit potential analysis:
+Using deactivation potential analysis:
 
 .. code-block:: python
 
@@ -25,7 +25,7 @@ Using open-circuit potential analysis:
        c0=3970.1e-12
    )
 
-Closed-circuit potential with overboost:
+Activation potential with overboost:
 
 .. code-block:: python
 
