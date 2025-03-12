@@ -96,7 +96,7 @@ class TestRootsMethod(unittest.TestCase):
 
     def test_difference_with_and_without_rp(self):
         """Test that the roots change when a parallel resistor is provided
-        compared to the open-circuit case."""
+        compared to the deactivation scenario."""
         result_no_rp = roots(self.rs, self.ls, self.cs, self.c0, rp=None)
         result_with_rp = roots(self.rs, self.ls, self.cs, self.c0, rp=500)
         # The two sets of roots should not be identical.

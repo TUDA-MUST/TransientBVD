@@ -112,7 +112,7 @@ def roots(
       a_0 = \frac{1}{L_s\, C_s\, R_p\, C_0}.
       \]
 
-    - When `rp` is not provided (open-circuit), the coefficients simplify to:
+    - When `rp` is not provided (deactivation condition), the coefficients simplify to:
 
       \[
       a_2 = \frac{R_s}{L_s}, \quad

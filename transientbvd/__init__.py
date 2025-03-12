@@ -3,23 +3,23 @@
 TransientBVD: A library for analyzing transient behavior in the Butterworth-Van Dyke (BVD) model.
 """
 
-# open.py
-from .open import (
-    open_potential,
-    print_open_potential,
-    open_tau,
-    open_two_tau,
+# deactivation.py
+from .deactivation import (
+    deactivation_potential,
+    print_deactivation_potential,
+    deactivation_tau,
+    deactivation_two_tau,
     optimum_resistance,
-    open_current,
+    deactivation_current,
 )
 
-# closed.py
-from .closed import (
-    closed_current,
+# activation.py
+from .activation import (
+    activation_current,
     switching_time,
-    closed_4tau,
-    closed_potential,
-    print_closed_potential,
+    activation_4tau,
+    activation_potential,
+    print_activation_potential,
 )
 
 # transducer.py
@@ -38,19 +38,19 @@ from .utils import (
 
 # Define an __all__ so that `from transientbvd import *` will only import these symbols
 __all__ = [
-    # From open.py
-    "open_potential",
-    "print_open_potential",
-    "open_tau",
-    "open_two_tau",
+    # From deactivation.py
+    "deactivation_potential",
+    "print_deactivation_potential",
+    "deactivation_tau",
+    "deactivation_two_tau",
     "optimum_resistance",
-    "open_current",
-    # From closed.py
-    "closed_current",
+    "deactivation_current",
+    # From activation.py
+    "activation_current",
     "switching_time",
-    "closed_4tau",
-    "closed_potential",
-    "print_closed_potential",
+    "activation_4tau",
+    "activation_potential",
+    "print_activation_potential",
     # From transducer.py
     "Transducer",
     "load_transducers",

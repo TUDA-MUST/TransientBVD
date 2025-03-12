@@ -7,15 +7,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![DOI](https://img.shields.io/badge/DOI-10.1234%2Fexample-blue.svg?style=flat-square)](https://doi.org/10.1234/example)
 
-**TransientBVD** is a Python library for analyzing and optimizing the transient response of ultrasound transducers (or other resonant systems) modeled by the Butterworth-Van Dyke (BVD) equivalent circuit. It implements advanced methods for both open-circuit (resistive damping) and closed-circuit (voltage overboost) strategies, significantly reducing transient response times.
+**TransientBVD** is a Python library for analyzing and optimizing the transient response of ultrasound transducers (or other resonant systems) modeled by the Butterworth-Van Dyke (BVD) equivalent circuit. It implements advanced methods for both **deactivation** (resistive damping) and **activation** (voltage overboost) strategies, significantly reducing transient response times.
 
 ## Features
 
-- **Open-circuit damping**: Quickly compute an optimal parallel resistor \(R_p\) to minimize open-circuit transient response times.
-- **Closed-circuit overboost**: Determine switching strategies (e.g. voltage amplitude changes) to reduce closed-circuit transient response times.
-- **Comprehensive analysis**: Includes handy methods like `print_open_potential` and `print_closed_potential` for quick insights.
+- **Deactivation damping**: Quickly compute an optimal parallel resistor \(R_p\) to minimize deactivation transient response times.
+- **Activation overboost**: Determine switching strategies (e.g. voltage amplitude changes) to reduce activation transient response times.
+- **Comprehensive analysis**: Includes handy methods like `print_deactivation_potential` and `print_activation_potential` for quick insights.
 - **Transducer utility**: Load already measured example transducers or define your own BVD parameters.
-- **Integration**: Based on Python (NumPy, SciPy, Sympy) for symbolic and numeric calculations.
+- **Integration**: Built on Python (NumPy, SciPy, Sympy) for both symbolic and numeric calculations.
 
 ## Documentation
 
@@ -30,7 +30,9 @@ this library supports the research findings presented in:
 
 > **"Rapid Transient Control Strategies for Ultrasound Transducers"**
 > 
-> Status: In Preparation
+> Status: In Preparation  
+> DOI: [10.1234/example](https://doi.org/10.1234/example)  *(Link to be updated upon publication)*
+
 
 If you find **TransientBVD** helpful in your academic work, please cite:
 
@@ -45,18 +47,3 @@ If you find **TransientBVD** helpful in your academic work, please cite:
   pages     = {??-??},
   doi       = {10.1234/example},
 }
-```
-
-## Acknowledgements
- 
-This work was supported through multiple grants and collaborations:
- 
-- **Carl Zeiss Stiftung** under the CZS Wildcard **SOPHIMA** project
-- **DFG** under Grant No. 509096131
-- **German Federal Ministry for Economic Affairs and Climate Action** under Grant No. 03LB3029
-- **Listen2Future*** is co-funded by the European Union (Chips Joint Undertaking) under **Grant No. 101096884**.
-
-> *Views and opinions expressed are those of the author(s) only and do not necessarily reflect 
-> those of the European Union or Chips Joint Undertaking. Neither the European Union nor the 
-> granting authority can be held responsible for them. The project is supported by the CHIPS JU and its members 
-> (including top-up funding by Austria, Belgium, Czech Republic, Germany, Netherlands, Norway, and Spain).

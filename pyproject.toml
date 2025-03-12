@@ -4,17 +4,16 @@ version = "0.1.0"
 description = "A Python library for transient response analysis and optimization using the Butterworth-Van Dyke (BVD) equivalent circuit model."
 authors = [
     "Jan Helge Döersam <jan_helge.doersam@tu-darmstadt.de>",
-    "Sven Suppelt <sven.suppelt@tu-darmstadt.de>",
-    "Mario Kupnik <mario.kupnik@tu-darmstadt.de>"
+    "Sven Suppelt <sven.suppelt@tu-darmstadt.de>"
 ]
 maintainers = [
     "Jan Helge Dörsam <jan_helge.doersam@tu-darmstadt.de>"
 ]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/jhd-old/TransientBVD"
-repository = "https://github.com/jhd-old/TransientBVD"
-keywords = ["BVD", "transient response", "rapid", "analysis", "optimization", "Butterworth-Van Dyke", "circuit", "ultrasound", "transducer", "ultrasonic", "step response"]
+homepage = "https://github.com/TUDA-MUST/TransientBVD"
+repository = "https://github.com/TUDA-MUST/TransientBVD"
+keywords = ["activation", "BVD", "deactivation", "transient response", "rapid", "analysis", "optimization", "Butterworth-Van Dyke", "circuit", "ultrasound", "transducer", "ultrasonic", "step response"]
 classifiers = [
     "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
