@@ -1,7 +1,7 @@
 """
-plot_activation_current_example.py
+activation_current_plot_example.py
 
-This script plots the closed-circuit transient current response from the
+This script plots the activation transient current response from the
 TransientBVD library. It compares:
 1. The overboost approach (using switching time).
 2. The default approach (only continuous-wave voltage).
@@ -21,7 +21,7 @@ def plot_activation_current(
     t_sw: float | None = None,
 ) -> None:
     """
-    Plot the transient current response over time for a closed circuit using the BVD model.
+    Plot the transient current response over time for an activation BVD model.
 
     If 'ub' is given, plots two lines:
       1) Overboost approach (from 0 to t_sw with Ub, then switching to Ucw).
@@ -97,7 +97,7 @@ def plot_activation_current(
     # 8) Final plot formatting
     plt.xlabel("Time (s)")
     plt.ylabel("Current (A)")
-    plt.title("Closed-Circuit Transient Current Response Example")
+    plt.title("Activation Transient Current Response Example")
     plt.legend()
     plt.grid()
     plt.show()
@@ -105,7 +105,7 @@ def plot_activation_current(
 
 def main():
     """
-    Demonstrates usage of the 'plot_closed_current' function.
+    Demonstrates usage of the 'plot_activation_current' function.
     """
     # Step 1: Select a predefined transducer
     selected_name = "SMBLTD45F40H_1"

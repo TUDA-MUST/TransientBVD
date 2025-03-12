@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from transientbvd import Transducer, open_tau
+from transientbvd import Transducer, deactivation_tau
 
 # Step 1: Create a transducer directly in the code
 transducer = (
@@ -19,7 +19,7 @@ print(transducer)
 
 # Step 2: Perform decay analysis over a resistance range
 resistance_range = np.linspace(10, 1000, 50)  # 50 points between 10 and 1000 ohms
-decay_times = [open_tau(transducer, rp=rp) for rp in resistance_range]
+decay_times = [deactivation_tau(transducer, rp=rp) for rp in resistance_range]
 
 # Create a DataFrame to store the results
 decay_df = pd.DataFrame(
