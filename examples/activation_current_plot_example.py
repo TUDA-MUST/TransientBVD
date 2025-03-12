@@ -1,5 +1,5 @@
 """
-plot_closed_current_example.py
+plot_activation_current_example.py
 
 This script plots the closed-circuit transient current response from the
 TransientBVD library. It compares:
@@ -10,10 +10,10 @@ TransientBVD library. It compares:
 import numpy as np
 import matplotlib.pyplot as plt
 from transientbvd import select_transducer
-from transientbvd.closed import closed_current, closed_4tau
+from transientbvd.activation import activation_current, activation_4tau
 
 
-def plot_closed_current(
+def plot_activation_current(
     timestamps: list[float],
     transducer,
     ucw: float,
@@ -47,7 +47,7 @@ def plot_closed_current(
     """
     # 1) Evaluate currents for the overboost approach (if ub is given) or default approach
     currents_overboost = [
-        closed_current(t, transducer, ucw, ub, t_sw) for t in timestamps
+        activation_current(t, transducer, ucw, ub, t_sw) for t in timestamps
     ]
 
     # 2) Plot results
@@ -68,7 +68,7 @@ def plot_closed_current(
     # 4) If ub is specified, also plot the scenario without any overboost
     if ub is not None:
         # Currents if only UCW is applied from t=0
-        currents_no_boost = [closed_current(t, transducer, ucw) for t in timestamps]
+        currents_no_boost = [activation_current(t, transducer, ucw) for t in timestamps]
         plt.plot(
             timestamps,
             currents_no_boost,
@@ -78,14 +78,14 @@ def plot_closed_current(
         )
 
     # 5) Plot the 4τ time for the overboost approach (or single approach if no ub)
-    t_4tau_overboost = closed_4tau(transducer, ucw, ub, t_sw)
+    t_4tau_overboost = activation_4tau(transducer, ucw, ub, t_sw)
     plt.axvline(
         x=t_4tau_overboost, color="black", linestyle="--", label="4τ (Overboost)"
     )
 
     # 6) If ub is specified, also show the 4τ time for no overboost
     if ub is not None:
-        t_4tau_no_boost = closed_4tau(transducer, ucw)
+        t_4tau_no_boost = activation_4tau(transducer, ucw)
         plt.axvline(
             x=t_4tau_no_boost, color="g", linestyle="dashed", label="4τ (Only U_cw)"
         )
@@ -123,7 +123,7 @@ def main():
     t_sw = 0.003  # 3 ms
 
     # Run the plotting function
-    plot_closed_current(
+    plot_activation_current(
         timestamps=timestamps, transducer=transducer, ucw=ucw, ub=ub, t_sw=t_sw
     )
 

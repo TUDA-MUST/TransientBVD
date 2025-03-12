@@ -6,12 +6,12 @@ from unittest.mock import patch
 import numpy as np
 
 from transientbvd import (
-    open_tau,
-    open_two_tau,
+    deactivation_tau,
+    deactivation_two_tau,
     optimum_resistance,
-    open_potential,
-    print_open_potential,
-    open_current,
+    deactivation_potential,
+    print_deactivation_potential,
+    deactivation_current,
 )
 from transientbvd.transducer import Transducer
 
@@ -28,7 +28,7 @@ class TestPrintOpenPotential(unittest.TestCase):
         resistance_range = (10, 5000)  # Resistance range in ohms
 
         # Call the method
-        print_open_potential(transducer, resistance_range)
+        print_deactivation_potential(transducer, resistance_range)
 
         # Assert that print was called at least once
         self.assertTrue(mock_print.called)
@@ -44,7 +44,7 @@ class TestOpenPotentialMethod(unittest.TestCase):
 
         # Calculate potential improvement
         optimal_resistance, tau_with_rp, delta_time, percentage_improvement = (
-            open_potential(transducer, resistance_range)
+            deactivation_potential(transducer, resistance_range)
         )
 
         # Assert values are reasonable and within expected ranges
@@ -63,7 +63,7 @@ class TestDecayTimeMethod(unittest.TestCase):
         )
 
         # Calculate decay time without rp
-        result = open_tau(transducer)
+        result = deactivation_tau(transducer)
 
         # Expected decay time (τ = 2L / R)
         expected = 2 * transducer.ls / transducer.rs
@@ -104,32 +104,32 @@ class TestOpenCurrent(unittest.TestCase):
     def test_open_current_t_zero(self):
         """Test open_current at t=0 should return exactly i0."""
         i0 = 1.0
-        result = open_current(0, i0, self.transducer)
+        result = deactivation_current(0, i0, self.transducer)
         self.assertAlmostEqual(result, i0, places=6)
 
     def test_open_current_large_t(self):
         """Test open_current for large t (t → ∞) should return ~0."""
         i0 = 1.0
-        result = open_current(10, i0, self.transducer)  # t = 10s
+        result = deactivation_current(10, i0, self.transducer)  # t = 10s
         self.assertAlmostEqual(result, 0.0, places=6)
 
     def test_open_current_zero_i0(self):
         """Test open_current with i0=0 should always return 0."""
-        result = open_current(1e-3, 0.0, self.transducer)  # Any time value
+        result = deactivation_current(1e-3, 0.0, self.transducer)  # Any time value
         self.assertAlmostEqual(result, 0.0, places=6)
 
     def test_open_current_high_resistance(self):
         """Test open_current with very high rs to simulate open circuit."""
         self.transducer.rs = 1e6  # Extremely high series resistance
         i0 = 1.0
-        result = open_current(10e-3, i0, self.transducer)  # t=10ms
+        result = deactivation_current(10e-3, i0, self.transducer)  # t=10ms
         self.assertAlmostEqual(result, 0.0, delta=1e-3)  # Allow small numerical errors
 
     def test_open_current_large_rp(self):
         """Test open_current with a very high rp (should behave like rp=None)."""
         self.transducer.rp = 1e9  # Very large parallel resistance
         i0 = 1.0
-        result = open_current(1e-3, i0, self.transducer)
+        result = deactivation_current(1e-3, i0, self.transducer)
         self.assertNotEqual(result, float("inf"))
         self.assertNotEqual(result, float("nan"))
 
@@ -138,7 +138,7 @@ class TestOpenCurrent(unittest.TestCase):
         self.transducer.rs = -5  # Negative resistance (non-physical case)
         i0 = 1.0
         with self.assertRaises(ValueError):
-            open_current(1e-3, i0, self.transducer)
+            deactivation_current(1e-3, i0, self.transducer)
 
     def test_open_current_known_case_long_time(self):
         """Test open_current for known transducer values at t=100ms (should decay to near zero)."""
@@ -152,7 +152,7 @@ class TestOpenCurrent(unittest.TestCase):
         tau = (2 * transducer.ls) / transducer.rs  # Approximation
         expected_i = i0 * np.exp(-t / tau)
 
-        result = open_current(t, i0, transducer)
+        result = deactivation_current(t, i0, transducer)
         self.assertAlmostEqual(result, expected_i, delta=1e-6)
 
 
