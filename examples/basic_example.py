@@ -1,5 +1,9 @@
 # basic_example.py
-from transientbvd import print_deactivation_potential, predefined_transducers, select_transducer
+from transientbvd import (
+    print_deactivation_potential,
+    predefined_transducers,
+    select_transducer,
+)
 from transientbvd.activation import print_activation_potential
 
 # Step 1: List all predefined transducers
