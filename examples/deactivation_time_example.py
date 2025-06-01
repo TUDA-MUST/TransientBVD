@@ -18,6 +18,6 @@ rp = 950  # Parallel resistance in ohms
 tau_with_rp = deactivation_tau(transducer, rp)
 two_tau_with_rp = deactivation_two_tau(transducer, rp)
 
-print("Decay Times with Parallel Resistance (rp=950 Ω):")
+print(f"Decay Times with Parallel Resistance (rp={rp} Ω):")
 print(f"  τ (Tau): {tau_with_rp:.6f} s ({tau_with_rp * 1e3:.2f} ms)")
 print(f"  2τ (Two Tau): {two_tau_with_rp:.6f} s ({two_tau_with_rp * 1e3:.2f} ms)")
