@@ -31,6 +31,7 @@ this library supports the research findings presented in:
 > **"Rapid Transient Control Strategies for Ultrasound Transducers"**
 > 
 > Status: Submitted
+> 
 > DOI: [10.1234/example](https://doi.org/10.1234/example)  *(Link to be updated upon publication)*
 
 
