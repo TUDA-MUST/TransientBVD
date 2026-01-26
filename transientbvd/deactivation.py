@@ -339,8 +339,15 @@ def deactivation_current(
         Initial current in amperes (\( i(0) = i_0 \)).
     transducer : Transducer
         The transducer object containing the equivalent circuit parameters.
-    rp : Optional[float], default=None
-        Parallel resistance in ohms. If None, uses `transducer.rp`.
+    rp : float | None, optional
+    Parallel damping resistance Rp in Ohms.
+
+    - If a float is provided, that value is used directly.
+    - If None, the function uses ``transducer.rp``.
+    - If both ``rp`` and ``transducer.rp`` are None, the transducer is treated as having
+      no parallel damping resistor connected (open circuit), i.e. Rp → ∞.
+      Internally this is implemented as ``rp = np.inf``.
+
 
     Returns
     -------
@@ -354,9 +361,15 @@ def deactivation_current(
     - Uses `transducer.rp` by default unless a different `rp` is explicitly provided.
     - This function now checks that all eigenvalues have non-positive real parts;
       if any eigenvalue has a positive real part, a ValueError is raised.
+    - The "regular" deactivation case (no external Rp connected) corresponds to Rp → ∞.
+    Using ``np.inf`` avoids ambiguity with the analytical "no-Rp" characteristic polynomial branch.
     """
     # Use transducer's rp if not explicitly provided
     rp = transducer.rp if rp is None else rp
+
+    # Interpret "no damping resistor connected" as an open circuit
+    if rp is None:
+        rp = np.inf
 
     # Compute eigenvalues (roots of the characteristic equation)
     eigenvalues = roots(
