@@ -1,4 +1,3 @@
-# .readthedocs.yaml
 version: 2
 
 build:
@@ -7,17 +6,12 @@ build:
     python: "3.11"
   jobs:
     install:
-      - "pip install poetry"
+      - pip install poetry
+      - poetry config virtualenvs.create false
+      - poetry install --with dev --no-interaction
 
 sphinx:
-  configuration: docs/conf.py
+  configuration: docs/source/conf.py
 
 formats:
   - pdf
-
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
