@@ -12,10 +12,13 @@ sys.path.insert(0, os.path.abspath("../.."))  # Example: up two levels from docs
 # -- Project information -----------------------------------------------------
 project = "TransientBVD"
 author = "Jan Helge Dörsam"
-copyright = f"{datetime.now().year}, TU Darmstadt - Measurement and Sensor Technology Group"
+copyright = (
+    f"{datetime.now().year}, TU Darmstadt - Measurement and Sensor Technology Group"
+)
 
 try:
     from importlib.metadata import version as _version  # py3.8+
+
     release = _version("transientbvd")
 except Exception:
     release = "0.0.0"
