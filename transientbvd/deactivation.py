@@ -329,6 +329,7 @@ def optimum_resistance(
     return optimal_resistance, minimal_decay_time
 
 
+# pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
 def deactivation_current(
     t: float,
     i0: float,
