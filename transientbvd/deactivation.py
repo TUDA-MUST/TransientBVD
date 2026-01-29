@@ -182,13 +182,27 @@ def deactivation_tau(transducer: Transducer, rp: Optional[float] = None) -> floa
         # Calculate the decay time without using rp (τ = 2L / R)
         return 2 * transducer.ls / transducer.rs
 
-    # Calculate the decay time using rp and the eigenvalues
     calculated_roots = roots(
         transducer.rs, transducer.ls, transducer.cs, transducer.c0, rp=rp
     )
-    second_root = calculated_roots[1]
-    decay_rate = abs(second_root.real)
-    return 1 / decay_rate if decay_rate > 0 else float("inf")
+
+    # If any root is unstable, fail loudly
+    for r in calculated_roots:
+        if complex(r).real > 1e-12:
+            raise ValueError(f"Unstable system: eigenvalue {r} has positive real part.")
+
+    # Exclude the near-zero open-circuit mode from tau selection
+    nonzero_roots = [complex(r) for r in calculated_roots if abs(complex(r).real) > 1e-9]
+
+    # If only the ~0 mode exists, the decay time is effectively infinite
+    if not nonzero_roots:
+        return float("inf")
+
+    # Slowest decay mode = real part closest to 0 (still negative)
+    dominant = max(nonzero_roots, key=lambda z: z.real)
+    decay_rate = -dominant.real
+
+    return 1 / decay_rate
 
 
 def deactivation_two_tau(transducer: Transducer, rp: Optional[float] = None) -> float:
@@ -314,91 +328,85 @@ def optimum_resistance(
 
 
 def deactivation_current(
-    t: float, i0: float, transducer: Transducer, rp: Optional[float] = None
+    t: float,
+    i0: float,
+    transducer: Transducer,
+    rp: Optional[float] = None,
+    di0: float = 0.0,
+    d2i0: Optional[float] = None,
 ) -> float:
     r"""
-    Calculate the transient current \( i(t) \) for a deactivation BVD model (3rd order),
-    assuming initial conditions:
-      \( i(0) = i_0 \), \( i'(0) = 0 \), \( i''(0) = 0 \).
+    Calculate the transient current i(t) for a deactivation BVD model (3rd order).
 
-    The system's eigenvalues are taken from ``roots(...)``. For a 3rd-order polynomial
-    (e.g., including parallel capacitance and optional parallel resistor), we get
-    three eigenvalues \( \lambda_1, \lambda_2, \lambda_3 \). The solution is:
+    For open-circuit termination (MOSFET opens), the characteristic polynomial
+    typically includes a root at 0. If you enforce i(0)=i0, i'(0)=0, i''(0)=0,
+    that zero-root mode can force an unphysical constant-current solution.
 
-    .. math::
-
-       i(t) = A\, e^{\lambda_1 t} + B\, e^{\lambda_2 t} + C\, e^{\lambda_3 t},
-
-    where \( A, B, C \) are determined from the initial conditions.
+    Therefore, the default initial conditions are chosen to represent a typical
+    switch-off at a *current peak*:
+      i(0)  = i0
+      i'(0) = di0  (default 0)
+      i''(0) ≈ -ω_d^2 * i0   (default inferred from oscillatory eigenpair)
 
     Parameters
     ----------
     t : float
-        Time in seconds at which to evaluate \( i(t) \).
+        Time (s) at which to evaluate i(t).
     i0 : float
-        Initial current in amperes (\( i(0) = i_0 \)).
+        Initial current i(0) in A.
     transducer : Transducer
-        The transducer object containing the equivalent circuit parameters.
-    rp : float | None, optional
-    Parallel damping resistance Rp in Ohms.
-
-    - If a float is provided, that value is used directly.
-    - If None, the function uses ``transducer.rp``.
-    - If both ``rp`` and ``transducer.rp`` are None, the transducer is treated as having
-      no parallel damping resistor connected (open circuit), i.e. Rp → ∞.
-      Internally this is implemented as ``rp = np.inf``.
-
+        Transducer containing rs, ls, cs, c0, and optional rp.
+    rp : Optional[float]
+        Parallel damping resistance. If None, uses transducer.rp.
+        If both are None => open circuit (Rp → ∞).
+    di0 : float
+        Initial derivative i'(0) in A/s. Default 0 (peak current assumption).
+    d2i0 : Optional[float]
+        Initial second derivative i''(0) in A/s^2.
+        If None, inferred as -ω_d^2*i0 using the oscillatory eigenpair.
 
     Returns
     -------
     float
-        The real part of \( i(t) \) under these assumptions.
-
-    Notes
-    -----
-    - If the system ends up with repeated roots or is effectively 2nd order, special cases
-      may need to be handled separately.
-    - Uses `transducer.rp` by default unless a different `rp` is explicitly provided.
-    - This function now checks that all eigenvalues have non-positive real parts;
-      if any eigenvalue has a positive real part, a ValueError is raised.
-    - The "regular" deactivation case (no external Rp connected) corresponds to Rp → ∞.
-    Using ``np.inf`` avoids ambiguity with the analytical "no-Rp" characteristic polynomial branch.
+        Real part of i(t).
     """
     # Use transducer's rp if not explicitly provided
     rp = transducer.rp if rp is None else rp
 
-    # Interpret "no damping resistor connected" as an open circuit
+    # MOSFET open => open circuit
     if rp is None:
         rp = np.inf
 
-    # Compute eigenvalues (roots of the characteristic equation)
-    eigenvalues = roots(
-        transducer.rs, transducer.ls, transducer.cs, transducer.c0, rp=rp
-    )
+    eigenvalues = roots(transducer.rs, transducer.ls, transducer.cs, transducer.c0, rp=rp)
 
-    # Check that all eigenvalues have non-positive real parts (i.e. system is stable)
+    # Stability check (allow tiny numerical noise)
     for lam in eigenvalues:
-        if lam.real > 0:
-            raise ValueError(
-                f"Unstable system: eigenvalue {lam} has positive real part."
-            )
+        if complex(lam).real > 1e-12:
+            raise ValueError(f"Unstable system: eigenvalue {lam} has positive real part.")
 
-    # Convert eigenvalues to complex numbers explicitly
+    # If user did not provide i''(0), infer it from the dominant oscillatory eigenpair
+    if d2i0 is None:
+        lam_osc = max((complex(z) for z in eigenvalues), key=lambda z: abs(z.imag))
+        omega_d = abs(lam_osc.imag)
+        d2i0 = -(omega_d ** 2) * i0 if omega_d > 0 else 0.0
+
     lam1_c, lam2_c, lam3_c = map(complex, eigenvalues)
 
-    # Solve the 3x3 system for coefficients A, B, C using the initial conditions:
-    # i(0) = A + B + C = i0,  i'(0) = lam1 A + lam2 B + lam3 C = 0, and
-    # i''(0) = lam1^2 A + lam2^2 B + lam3^2 C = 0.
+    # Solve for A, B, C from:
+    # i(0)  = A + B + C = i0
+    # i'(0) = lam1*A + lam2*B + lam3*C = di0
+    # i''(0)= lam1^2*A + lam2^2*B + lam3^2*C = d2i0
     matrix = np.array(
-        [[1.0, 1.0, 1.0], [lam1_c, lam2_c, lam3_c], [lam1_c**2, lam2_c**2, lam3_c**2]],
+        [
+            [1.0, 1.0, 1.0],
+            [lam1_c, lam2_c, lam3_c],
+            [lam1_c**2, lam2_c**2, lam3_c**2],
+        ],
         dtype=complex,
     )
-    rhs = np.array([i0, 0.0, 0.0], dtype=complex)
-    solution_abc = np.linalg.solve(matrix, rhs)
+    rhs = np.array([i0, di0, d2i0], dtype=complex)
+    A, B, C = np.linalg.solve(matrix, rhs)
 
-    # Compute i(t) = A e^(λ1 t) + B e^(λ2 t) + C e^(λ3 t)
-    i_t = sum(
-        coef * cmath.exp(lam * t)
-        for coef, lam in zip(solution_abc, (lam1_c, lam2_c, lam3_c))
-    )
-    return i_t.real  # Return only the real part
+    i_t = A * cmath.exp(lam1_c * t) + B * cmath.exp(lam2_c * t) + C * cmath.exp(lam3_c * t)
+    return float(i_t.real)
+

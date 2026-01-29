@@ -12,7 +12,6 @@ from typing import List
 from typing import overload, Optional
 
 import numpy as np
-from sympy import solve, symbols
 
 
 @overload
@@ -84,73 +83,55 @@ def roots(
     Calculate the roots of the characteristic polynomial for the transient response
     of a system modeled by the Butterworth-Van Dyke (BVD) equivalent circuit.
 
-    Parameters
-    ----------
-    rs : float, optional
-        Series resistance in ohms.
-    ls : float, optional
-        Inductance in henries.
-    cs : float, optional
-        Series capacitance in farads.
-    c0 : float, optional
-        Parallel capacitance in farads.
-    rp : float, optional
-        Parallel resistance in ohms (if provided, a different polynomial is used).
+    IMPORTANT TERMINATION SEMANTICS (matches "MOSFET opens"):
+    - rp is None  => open circuit termination (Rp → ∞)
+    - rp is +inf  => open circuit termination (Rp → ∞)
+    - rp is finite positive => explicit parallel damping resistor
+
+    For open circuit (Rp → ∞), the cubic has a0 = 0, which introduces a root at 0.
+    That is expected for this terminal condition; the transient decay then comes from
+    the oscillatory pair’s negative real part (≈ -Rs/(2Ls)).
 
     Returns
     -------
     List[complex]
-        Roots of the characteristic polynomial.
-
-    Notes
-    -----
-    - When `rp` is provided, the coefficients are computed as:
-
-      \[
-      a_2 = \frac{R_s}{L_s} + \frac{1}{R_p\, C_0}, \quad
-      a_1 = \frac{R_s}{R_p\, L_s\, C_0} + \frac{1}{L_s\,C_s} + \frac{1}{L_s\,C_0}, \quad
-      a_0 = \frac{1}{L_s\, C_s\, R_p\, C_0}.
-      \]
-
-    - When `rp` is not provided (deactivation condition), the coefficients simplify to:
-
-      \[
-      a_2 = \frac{R_s}{L_s}, \quad
-      a_1 = \frac{1}{L_s\, C_s} + \frac{1}{L_s\, C_0}, \quad
-      a_0 = \frac{1}{L_s\, C_s\, C_0}.
-      \]
+        Roots (complex) of: s^3 + a2*s^2 + a1*s + a0 = 0
 
     Raises
     ------
     ValueError
-        If any required parameters are missing or if any parameter is non-positive.
+        If parameters are missing or non-positive, or rp is non-positive when finite.
     """
     # Ensure required parameters are provided
     if rs is None or ls is None or cs is None or c0 is None:
-        raise ValueError(
-            "All parameters (rs, ls, cs, c0) must be provided directly or via an object."
-        )
+        raise ValueError("All parameters (rs, ls, cs, c0) must be provided.")
 
     # Validate parameter values
     if rs <= 0 or ls <= 0 or cs <= 0 or c0 <= 0:
         raise ValueError("All BVD model parameters (rs, ls, cs, c0) must be positive.")
-    if rp is not None and rp <= 0:
-        raise ValueError("If provided, rp must be a positive value.")
 
-    # Calculate the coefficients of the characteristic polynomial
-    if rp is not None:  # With parallel resistance
-        a2 = rs / ls + 1 / (rp * c0)
-        a1 = rs / (rp * ls * c0) + 1 / (cs * ls) + 1 / (ls * c0)
-        a0 = 1 / (cs * rp * ls * c0)
-    else:  # Without parallel resistance\n
+    # Normalize semantics: "no Rp" means open circuit (MOSFET open) => Rp -> ∞
+    if rp is None:
+        rp = np.inf
+
+    if np.isfinite(rp):
+        if rp <= 0:
+            raise ValueError("If provided, rp must be a positive value.")
+        # With finite parallel resistance Rp
+        a2 = rs / ls + 1.0 / (rp * c0)
+        a1 = rs / (rp * ls * c0) + 1.0 / (ls * cs) + 1.0 / (ls * c0)
+        a0 = 1.0 / (ls * cs * rp * c0)
+    else:
+        # Open circuit Rp -> ∞ (MOSFET opens)
         a2 = rs / ls
-        a1 = 1 / (cs * ls) + 1 / (ls * c0)
-        a0 = 1 / (cs * ls * c0)
+        a1 = 1.0 / (ls * cs) + 1.0 / (ls * c0)
+        a0 = 0.0
 
-    # Construct the characteristic polynomial: x^3 + a2 * x^2 + a1 * x + a0 = 0
-    x = symbols("x")
-    eq = x**3 + a2 * x**2 + a1 * x + a0
+    # Solve cubic numerically: s^3 + a2*s^2 + a1*s + a0 = 0
+    coeff = np.array([1.0, a2, a1, a0], dtype=float)
+    rts = np.roots(coeff)
 
-    # Solve for the roots and return them as complex numbers
-    p_roots = solve(eq, x)
-    return [complex(root.evalf()) for root in p_roots]
+    # Deterministic ordering helps downstream code (tau selection, debugging)
+    rts_sorted = sorted((complex(x) for x in rts), key=lambda z: (z.real, z.imag), reverse=True)
+    return rts_sorted
+
