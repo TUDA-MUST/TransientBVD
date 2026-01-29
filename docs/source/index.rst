@@ -1,7 +1,7 @@
 .. TransientBVD master doc
 
 ============================================
-TransientBVD — Transient Response Analysis
+TransientBVD - Transient Response Analysis
 ============================================
 
 **TransientBVD** is a Python library for analyzing and optimizing the transient
@@ -43,14 +43,14 @@ If you find **TransientBVD** helpful in your own research, please cite:
 .. code-block:: bibtex
 
    @article{doersamTransientBVD2024,
-     title     = {Rapid Transient Control Strategies for Ultrasound Transducers},
-     author    = author    = {Dörsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schrödel, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Soeren and Heyl, Christoph and Kupnik, Mario},
-     journal   = {IEEE TRANSACTIONS ON ULTRASONICS, FERROELECTRICS, AND FREQUENCY CONTROL},
-     year      = {2025},
-     volume    = {??},
-     number    = {??},
-     pages     = {??-??},
-     doi       = {10.1234/example},
+     title   = {Rapid Transient Control Strategies for Ultrasound Transducers},
+     author  = {D{\"o}rsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schr{\"o}del, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Soeren and Heyl, Christoph and Kupnik, Mario},
+     journal = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+     year    = {2025},
+     volume  = {??},
+     number  = {??},
+     pages   = {??--??},
+     doi     = {10.1234/example},
    }
 
 Acknowledgements

@@ -42,10 +42,15 @@ napoleon_numpy_docstring = True
 # Autodoc settings
 autodoc_typehints = "description"  # or 'both', 'none', etc.
 autoclass_content = "both"  # Include __init__ docstrings for classes
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
+html_static_path = []
 
 # If you prefer a different theme (e.g. ''), simply install it
 # and change html_theme = 'sphinx_rtd_theme' or similar.

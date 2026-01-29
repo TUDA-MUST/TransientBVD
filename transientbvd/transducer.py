@@ -18,9 +18,9 @@ from typing import Dict, Optional, Any, Mapping, Union
 @dataclass
 class Transducer:
     """
-    Represents an ultrasound transducer with predefined parameters.
+    Represents an ultrasound transducer described by a BVD equivalent circuit.
 
-    Attributes
+    Parameters
     ----------
     rs : float
         Series resistance in ohms. Must be positive.
@@ -30,12 +30,12 @@ class Transducer:
         Series capacitance in farads. Must be positive.
     c0 : float
         Parallel capacitance in farads. Must be positive.
-    rp : Optional[float], default=None
+    rp : Optional[float], optional
         Parallel resistance in ohms. If provided, must be positive.
-    name : str, default="Unknown"
-        The name of the transducer.
-    manufacturer : Optional[str], default=None
-        Manufacturer information for the transducer.
+    name : str, optional
+        Human-readable transducer name.
+    manufacturer : Optional[str], optional
+        Manufacturer name.
     """
 
     rs: float

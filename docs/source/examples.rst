@@ -22,7 +22,7 @@ Demonstrates creating a predefined transducer object and using library methods.
    :linenos:
 
 Deactivation Time Example
--------------------------------
+-------------------------
 Shows how to compute deactivation time (τ) in different conditions for deactivation.
 
 .. literalinclude:: ../../examples/deactivation_time_example.py
@@ -30,7 +30,7 @@ Shows how to compute deactivation time (τ) in different conditions for deactiva
    :linenos:
 
 Deactivation Time Over Rp Example
-----------------------------------------
+---------------------------------
 Explores how deactivation time changes over various parallel resistance values (Rp)
 in the deactivation scenario.
 
@@ -42,7 +42,7 @@ Optimum Resistance Example
 --------------------------
 Uses the library’s optimization routine to find the best Rp for minimal deactivation time.
 
-.. literalinclude:: ../../examples/optimum_resistance_example.py
+.. literalinclude:: ../../examples/deactivation_optimum_resistance_example.py
    :language: python
    :linenos:
 

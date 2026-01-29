@@ -73,45 +73,31 @@ def print_deactivation_potential(
 def deactivation_potential(
     transducer: Transducer, resistance_range: Tuple[float, float] = (10, 5000)
 ) -> Tuple[float, float, float, float]:
-    r"""
-    Evaluate the improvement in transient decay time when using the optimal parallel resistance
-    versus not using a parallel resistance in a deactivation scenario.
+    """
+    Evaluate deactivation performance over a resistance range.
 
-    The method calculates the decay time for two cases:
-    1. With the optimal parallel resistance, where the time constant is determined
-       by the eigenvalues of the characteristic polynomial.
-    2. Without a parallel resistance, where the time constant is approximated as:
-
-    .. math::
-
-        \tau = \frac{2L}{R},
-
-    where :math:`L` is the inductance and :math:`R` is the series resistance.
-
-    The improvement is expressed as the absolute difference in decay time
-    and the percentage reduction.
+    This helper computes:
+    - the "no-Rp" decay time estimate (tau_no_rp = 2*Ls/Rs)
+    - the optimum parallel resistance Rp within the provided range
+    - the corresponding decay time with Rp
+    - absolute and relative improvement vs. no-Rp
 
     Parameters
     ----------
     transducer : Transducer
-        A transducer object containing the necessary circuit parameters.
+        Transducer parameters (Rs, Ls, Cs, C0).
     resistance_range : Tuple[float, float], optional
-        A tuple representing the lower and upper bounds of resistances (in ohms) to evaluate
-        for damping optimization. Default is (10, 5000).
+        Search interval (min_Rp, max_Rp) in ohms. Defaults to (10, 5000).
 
     Returns
     -------
     Tuple[float, float, float, float]
-        A tuple containing:
-        - The optimal resistance value (in ohms).
-        - The optimized minimal decay time (in seconds).
-        - The absolute improvement in decay time (in seconds).
-        - The percentage improvement in decay time (%).
-
-    Notes
-    -----
-    The method assumes that the system can be represented by the BVD equivalent circuit and
-    that the transient response is governed by the resistive, capacitive, and inductive components.
+        (optimal_resistance, tau_with_rp, delta_time, percentage_improvement)
+        where:
+        - optimal_resistance is Rp in ohms
+        - tau_with_rp is the decay time in seconds using optimal_resistance
+        - delta_time = tau_no_rp - tau_with_rp in seconds
+        - percentage_improvement = 100 * delta_time / tau_no_rp
     """
     # Extract parameters from transducer
     rs, ls, cs, c0 = transducer.rs, transducer.ls, transducer.cs, transducer.c0
@@ -338,40 +324,38 @@ def deactivation_current(
     di0: float = 0.0,
     d2i0: Optional[float] = None,
 ) -> float:
-    r"""
-    Calculate the transient current i(t) for a deactivation BVD model (3rd order).
+    """
+    Calculate the transient current i(t) for the deactivation case (MOSFET opens).
 
-    For open-circuit termination (MOSFET opens), the characteristic polynomial
-    typically includes a root at 0. If you enforce i(0)=i0, i'(0)=0, i''(0)=0,
-    that zero-root mode can force an unphysical constant-current solution.
+    Notes
+    -----
+    For open-circuit termination (Rp -> infinity), the characteristic polynomial can
+    include a root at 0. If i(0)=i0, i'(0)=0, and i''(0)=0 are enforced, this can
+    collapse into a constant-current solution.
 
-    Therefore, the default initial conditions are chosen to represent a typical
-    switch-off at a *current peak*:
-      i(0)  = i0
-      i'(0) = di0  (default 0)
-      i''(0) ≈ -ω_d^2 * i0   (default inferred from oscillatory eigenpair)
+    Therefore, if d2i0 is not provided, it is inferred from the dominant oscillatory
+    eigenpair as approximately: d2i0 ~= -(omega_d**2) * i0.
 
     Parameters
     ----------
     t : float
-        Time (s) at which to evaluate i(t).
+        Time in seconds.
     i0 : float
-        Initial current i(0) in coef_a.
+        Initial current i(0) in ampere.
     transducer : Transducer
-        Transducer containing rs, ls, cs, c0, and optional rp.
+        Transducer parameters.
     rp : Optional[float]
-        Parallel damping resistance. If None, uses transducer.rp.
-        If both are None => open circuit (Rp → ∞).
+        Parallel damping resistance. If None, uses transducer.rp. If still None,
+        open circuit is assumed.
     di0 : float
-        Initial derivative i'(0) in coef_a/s. Default 0 (peak current assumption).
+        Initial derivative i'(0) in A/s.
     d2i0 : Optional[float]
-        Initial second derivative i''(0) in coef_a/s^2.
-        If None, inferred as -ω_d^2*i0 using the oscillatory eigenpair.
+        Initial second derivative i''(0) in A/s^2.
 
     Returns
     -------
     float
-        Real part of i(t).
+        Current i(t).
     """
     # Use transducer's rp if not explicitly provided
     rp = transducer.rp if rp is None else rp

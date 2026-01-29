@@ -1,17 +1,17 @@
 transientbvd Package
 ====================
 
-Open-Circuit Methods (open.py)
+Deactivation (deactivation.py)
 ------------------------------
-.. automodule:: transientbvd.open
+.. automodule:: transientbvd.deactivation
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-Closed-Circuit Methods (closed.py)
-----------------------------------
-.. automodule:: transientbvd.closed
+Activation (activation.py)
+--------------------------
+.. automodule:: transientbvd.activation
    :members:
    :undoc-members:
    :show-inheritance:
@@ -21,7 +21,6 @@ Transducer Class (transducer.py)
 --------------------------------
 .. automodule:: transientbvd.transducer
    :members:
-   :undoc-members:
    :show-inheritance:
 
 
