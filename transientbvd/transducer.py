@@ -13,6 +13,12 @@ from pathlib import Path
 from typing import Dict
 from typing import Optional
 
+import os
+from importlib import resources
+from typing import Any
+from typing import Mapping
+from typing import Union
+
 
 @dataclass
 class Transducer:
@@ -159,76 +165,87 @@ class Transducer:
         )
 
 
-# Default path to the JSON file containing pre-measured transducers
-DEFAULT_JSON_FILE_PATH = Path(__file__).parent / "data" / "transducers.json"
+# Environment variable that can override the transducer database location
+TRANSDUCERS_ENV_VAR = "TRANSIENTBVD_TRANSDUCERS_JSON"
+
+# Relative path inside the package for the bundled default database
+DEFAULT_TRANSDUCERS_RESOURCE = "data/transducers.json"
 
 
-def load_transducers(
-    json_file: str = str(DEFAULT_JSON_FILE_PATH),
-) -> Dict[str, Transducer]:
+JsonPath = Union[str, Path]
+
+
+def _load_transducer_db_json(json_file: Optional[JsonPath] = None) -> Mapping[str, Any]:
     """
-    Load transducer data from a JSON file and create Transducer objects.
+    Load the transducer database JSON using a clean precedence order:
+
+    1) Explicit `json_file` argument (path on disk)
+    2) Environment variable TRANSIENTBVD_TRANSDUCERS_JSON (path on disk)
+    3) Bundled default resource inside the installed package
+
+    This works for normal installs and wheels because it uses importlib.resources
+    for the bundled default.
+    """
+    # 1) explicit path wins
+    if json_file is not None:
+        json_path = Path(json_file)
+        with json_path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+
+    # 2) environment override
+    env_path = os.environ.get(TRANSDUCERS_ENV_VAR)
+    if env_path:
+        json_path = Path(env_path)
+        with json_path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+
+    # 3) bundled default (package data)
+    # Note: resources.files(...) is available in Python 3.9+
+    resource = resources.files("transientbvd").joinpath(DEFAULT_TRANSDUCERS_RESOURCE)
+    with resource.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_transducers(json_file: Optional[JsonPath] = None) -> Dict[str, Transducer]:
+    """
+    Load transducer data and create Transducer objects.
 
     Parameters
     ----------
-    json_file : str, optional
-        Path to the JSON file containing transducer data.
-        Defaults to the predefined transducer data file.
+    json_file : Optional[Union[str, Path]]
+        Path to a JSON file. If None:
+        - will try env var TRANSIENTBVD_TRANSDUCERS_JSON
+        - otherwise loads the bundled default database.
 
     Returns
     -------
     Dict[str, Transducer]
-        A dictionary of Transducer objects, keyed by their names.
-
-    Raises
-    ------
-    FileNotFoundError
-        If the specified JSON file does not exist.
-    JSONDecodeError
-        If the JSON file is malformed.
+        Dictionary keyed by transducer name.
     """
-    json_path = Path(json_file)
-    with json_path.open("r", encoding="utf-8") as file:
-        data = json.load(file)  # Load data from JSON file
+    data = _load_transducer_db_json(json_file=json_file)
 
-    # Create Transducer objects from loaded data
-    return {
-        name: Transducer(
-            rs=params["rs"],
-            ls=params["ls"],
-            cs=params["cs"],
-            c0=params["c0"],
-            rp=params.get("rp"),
-        )
-        .set_name(name)
-        .set_manufacturer(params.get("manufacturer", "Unknown"))
-        for name, params in data.items()
-    }
+    transducers: Dict[str, Transducer] = {}
+    for name, params in data.items():
+        t = Transducer(
+            rs=float(params["rs"]),
+            ls=float(params["ls"]),
+            cs=float(params["cs"]),
+            c0=float(params["c0"]),
+            rp=float(params["rp"]) if params.get("rp") is not None else None,
+        ).set_name(str(name)).set_manufacturer(params.get("manufacturer", "Unknown"))
+        transducers[str(name)] = t
+
+    return transducers
 
 
-def load_measured_transducers(
-    json_file: str = str(DEFAULT_JSON_FILE_PATH),
-) -> Dict[str, Transducer]:
+def load_measured_transducers(json_file: Optional[JsonPath] = None) -> Dict[str, Transducer]:
     """
-    Load and return the dictionary of predefined transducers from a JSON file.
-
-    Parameters
-    ----------
-    json_file : str, optional
-        Path to the JSON file containing transducer data.
-        Defaults to the predefined transducer data file.
-
-    Returns
-    -------
-    Dict[str, Transducer]
-        A dictionary of predefined transducer objects.
+    Backwards-compatible alias for load_transducers().
     """
-    return load_transducers(json_file)
+    return load_transducers(json_file=json_file)
 
 
-def select_transducer(
-    name: str, json_file: str = str(DEFAULT_JSON_FILE_PATH)
-) -> Transducer:
+def select_transducer(name: str, json_file: Optional[JsonPath] = None) -> Transducer:
     """
     Retrieve a predefined transducer by its name.
 
@@ -236,21 +253,15 @@ def select_transducer(
     ----------
     name : str
         Name of the transducer to retrieve.
-    json_file : str, optional
-        Path to the JSON file containing transducer data.
-        Defaults to the predefined transducer data file.
-
-    Returns
-    -------
-    Transducer
-        The Transducer object corresponding to the given name.
+    json_file : Optional[Union[str, Path]]
+        Optional JSON database path override.
 
     Raises
     ------
     ValueError
-        If the specified transducer name does not exist.
+        If the transducer name does not exist.
     """
-    measured_transducers = load_measured_transducers(json_file)
+    measured_transducers = load_measured_transducers(json_file=json_file)
 
     if name not in measured_transducers:
         available = ", ".join(measured_transducers.keys())
@@ -261,21 +272,19 @@ def select_transducer(
     return measured_transducers[name]
 
 
-def predefined_transducers(
-    json_file: str = str(DEFAULT_JSON_FILE_PATH),
-) -> Dict[str, Transducer]:
+def predefined_transducers(json_file: Optional[JsonPath] = None) -> Dict[str, Transducer]:
     """
     Get a dictionary of all predefined transducers.
 
     Parameters
     ----------
-    json_file : str, optional
-        Path to the JSON file containing transducer data.
-        Defaults to the predefined transducer data file.
+    json_file : Optional[Union[str, Path]]
+        Optional JSON database path override.
 
     Returns
     -------
     Dict[str, Transducer]
-        A dictionary mapping transducer names to Transducer objects.
+        Dictionary mapping transducer names to Transducer objects.
     """
-    return load_measured_transducers(json_file)
+    return load_measured_transducers(json_file=json_file)
+
