@@ -2,9 +2,13 @@ name: Tests
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
 
 jobs:
   test:
@@ -20,39 +24,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
 
-      - name: Install Poetry (via pipx)
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install --user pipx
-          python -m pipx ensurepath
-          pipx install poetry
-
-      - name: Configure Poetry to use in-project venv
-        run: poetry config virtualenvs.in-project true
-
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-py${{ matrix.python-version }}-poetry-venv-${{ hashFiles('poetry.lock') }}
-
-      - name: Cache Poetry downloads
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.cache/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}-poetry-cache-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-py${{ matrix.python-version }}-poetry-cache-
+      - name: Install Poetry
+        run: pip install poetry
 
       - name: Install Dependencies
-        run: poetry install --no-interaction
+        run: poetry install
 
       - name: Run Unit Tests
         run: poetry run pytest
