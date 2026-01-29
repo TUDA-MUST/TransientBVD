@@ -107,6 +107,43 @@ class TestDeactivationCurrent(unittest.TestCase):
         result = deactivation_current(0, i0, self.transducer)
         self.assertAlmostEqual(result, i0, places=6)
 
+    def test_deactivation_current_open_circuit_t_zero(self):
+        """Open-circuit (MOSFET opens): at t=0 the current must equal i0."""
+        self.transducer.rp = None  # MOSFET open => open circuit
+        i0 = 1.0
+        result = deactivation_current(0.0, i0, self.transducer)
+        self.assertAlmostEqual(result, i0, places=6)
+
+    def test_deactivation_current_open_circuit_envelope_decays(self):
+        """Open-circuit (MOSFET opens): ringdown envelope must decay over time.
+
+        We avoid sign flips from oscillation by comparing the max(|i(t)|) in an
+        early window vs a late window.
+        """
+        self.transducer.rp = None  # MOSFET open => open circuit
+        i0 = 1.0
+
+        # Use windows relative to tau ~ 2L/R (few ms for the default transducer)
+        t_early = np.linspace(0.0, 1e-3, 200)  # 0 .. 1 ms
+        t_late = np.linspace(10e-3, 20e-3, 400)  # 10 .. 20 ms
+
+        early_vals = np.array(
+            [deactivation_current(float(t), i0, self.transducer) for t in t_early])
+        late_vals = np.array(
+            [deactivation_current(float(t), i0, self.transducer) for t in t_late])
+
+        early_max = float(np.max(np.abs(early_vals)))
+        late_max = float(np.max(np.abs(late_vals)))
+
+        # Sanity: early window should still be "near" the initial amplitude
+        self.assertGreater(early_max, 0.5)
+
+        # Envelope should decay strongly by 10-20 ms (many taus for this device)
+        self.assertLess(late_max, early_max * 0.2)
+
+        # Also ensure we didn't accidentally create a (nearly) constant current solution
+        self.assertGreater(early_max - late_max, 0.1)
+
     def test_deactivation_current_large_t(self):
         """Test deactivation_current for large t (t → ∞) should return ~0."""
         i0 = 1.0
