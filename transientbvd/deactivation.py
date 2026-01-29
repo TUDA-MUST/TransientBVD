@@ -192,7 +192,9 @@ def deactivation_tau(transducer: Transducer, rp: Optional[float] = None) -> floa
             raise ValueError(f"Unstable system: eigenvalue {r} has positive real part.")
 
     # Exclude the near-zero open-circuit mode from tau selection
-    nonzero_roots = [complex(r) for r in calculated_roots if abs(complex(r).real) > 1e-9]
+    nonzero_roots = [
+        complex(r) for r in calculated_roots if abs(complex(r).real) > 1e-9
+    ]
 
     # If only the ~0 mode exists, the decay time is effectively infinite
     if not nonzero_roots:
@@ -353,16 +355,16 @@ def deactivation_current(
     t : float
         Time (s) at which to evaluate i(t).
     i0 : float
-        Initial current i(0) in A.
+        Initial current i(0) in coef_a.
     transducer : Transducer
         Transducer containing rs, ls, cs, c0, and optional rp.
     rp : Optional[float]
         Parallel damping resistance. If None, uses transducer.rp.
         If both are None => open circuit (Rp → ∞).
     di0 : float
-        Initial derivative i'(0) in A/s. Default 0 (peak current assumption).
+        Initial derivative i'(0) in coef_a/s. Default 0 (peak current assumption).
     d2i0 : Optional[float]
-        Initial second derivative i''(0) in A/s^2.
+        Initial second derivative i''(0) in coef_a/s^2.
         If None, inferred as -ω_d^2*i0 using the oscillatory eigenpair.
 
     Returns
@@ -377,25 +379,29 @@ def deactivation_current(
     if rp is None:
         rp = np.inf
 
-    eigenvalues = roots(transducer.rs, transducer.ls, transducer.cs, transducer.c0, rp=rp)
+    eigenvalues = roots(
+        transducer.rs, transducer.ls, transducer.cs, transducer.c0, rp=rp
+    )
 
     # Stability check (allow tiny numerical noise)
     for lam in eigenvalues:
         if complex(lam).real > 1e-12:
-            raise ValueError(f"Unstable system: eigenvalue {lam} has positive real part.")
+            raise ValueError(
+                f"Unstable system: eigenvalue {lam} has positive real part."
+            )
 
     # If user did not provide i''(0), infer it from the dominant oscillatory eigenpair
     if d2i0 is None:
         lam_osc = max((complex(z) for z in eigenvalues), key=lambda z: abs(z.imag))
         omega_d = abs(lam_osc.imag)
-        d2i0 = -(omega_d ** 2) * i0 if omega_d > 0 else 0.0
+        d2i0 = -(omega_d**2) * i0 if omega_d > 0 else 0.0
 
     lam1_c, lam2_c, lam3_c = map(complex, eigenvalues)
 
-    # Solve for A, B, C from:
-    # i(0)  = A + B + C = i0
-    # i'(0) = lam1*A + lam2*B + lam3*C = di0
-    # i''(0)= lam1^2*A + lam2^2*B + lam3^2*C = d2i0
+    # Solve for coef_a, coef_b, coef_c from:
+    # i(0)  = coef_a + coef_b + coef_c = i0
+    # i'(0) = lam1*coef_a + lam2*coef_b + lam3*coef_c = di0
+    # i''(0)= lam1^2*coef_a + lam2^2*coef_b + lam3^2*coef_c = d2i0
     matrix = np.array(
         [
             [1.0, 1.0, 1.0],
@@ -405,8 +411,11 @@ def deactivation_current(
         dtype=complex,
     )
     rhs = np.array([i0, di0, d2i0], dtype=complex)
-    A, B, C = np.linalg.solve(matrix, rhs)
+    coef_a, coef_b, coef_c = np.linalg.solve(matrix, rhs)
 
-    i_t = A * cmath.exp(lam1_c * t) + B * cmath.exp(lam2_c * t) + C * cmath.exp(lam3_c * t)
+    i_t = (
+        coef_a * cmath.exp(lam1_c * t)
+        + coef_b * cmath.exp(lam2_c * t)
+        + coef_c * cmath.exp(lam3_c * t)
+    )
     return float(i_t.real)
-

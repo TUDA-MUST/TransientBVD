@@ -128,9 +128,11 @@ class TestDeactivationCurrent(unittest.TestCase):
         t_late = np.linspace(10e-3, 20e-3, 400)  # 10 .. 20 ms
 
         early_vals = np.array(
-            [deactivation_current(float(t), i0, self.transducer) for t in t_early])
+            [deactivation_current(float(t), i0, self.transducer) for t in t_early]
+        )
         late_vals = np.array(
-            [deactivation_current(float(t), i0, self.transducer) for t in t_late])
+            [deactivation_current(float(t), i0, self.transducer) for t in t_late]
+        )
 
         early_max = float(np.max(np.abs(early_vals)))
         late_max = float(np.max(np.abs(late_vals)))

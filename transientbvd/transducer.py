@@ -8,16 +8,11 @@ parameters and additional metadata such as the manufacturer and resonance freque
 
 import json
 import math
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict
-from typing import Optional
-
 import os
+from dataclasses import dataclass
 from importlib import resources
-from typing import Any
-from typing import Mapping
-from typing import Union
+from pathlib import Path
+from typing import Dict, Optional, Any, Mapping, Union
 
 
 @dataclass
@@ -226,19 +221,25 @@ def load_transducers(json_file: Optional[JsonPath] = None) -> Dict[str, Transduc
 
     transducers: Dict[str, Transducer] = {}
     for name, params in data.items():
-        t = Transducer(
-            rs=float(params["rs"]),
-            ls=float(params["ls"]),
-            cs=float(params["cs"]),
-            c0=float(params["c0"]),
-            rp=float(params["rp"]) if params.get("rp") is not None else None,
-        ).set_name(str(name)).set_manufacturer(params.get("manufacturer", "Unknown"))
+        t = (
+            Transducer(
+                rs=float(params["rs"]),
+                ls=float(params["ls"]),
+                cs=float(params["cs"]),
+                c0=float(params["c0"]),
+                rp=float(params["rp"]) if params.get("rp") is not None else None,
+            )
+            .set_name(str(name))
+            .set_manufacturer(params.get("manufacturer", "Unknown"))
+        )
         transducers[str(name)] = t
 
     return transducers
 
 
-def load_measured_transducers(json_file: Optional[JsonPath] = None) -> Dict[str, Transducer]:
+def load_measured_transducers(
+    json_file: Optional[JsonPath] = None,
+) -> Dict[str, Transducer]:
     """
     Backwards-compatible alias for load_transducers().
     """
@@ -272,7 +273,9 @@ def select_transducer(name: str, json_file: Optional[JsonPath] = None) -> Transd
     return measured_transducers[name]
 
 
-def predefined_transducers(json_file: Optional[JsonPath] = None) -> Dict[str, Transducer]:
+def predefined_transducers(
+    json_file: Optional[JsonPath] = None,
+) -> Dict[str, Transducer]:
     """
     Get a dictionary of all predefined transducers.
 
@@ -287,4 +290,3 @@ def predefined_transducers(json_file: Optional[JsonPath] = None) -> Dict[str, Tr
         Dictionary mapping transducer names to Transducer objects.
     """
     return load_measured_transducers(json_file=json_file)
-

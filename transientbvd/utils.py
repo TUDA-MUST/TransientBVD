@@ -132,6 +132,7 @@ def roots(
     rts = np.roots(coeff)
 
     # Deterministic ordering helps downstream code (tau selection, debugging)
-    rts_sorted = sorted((complex(x) for x in rts), key=lambda z: (z.real, z.imag), reverse=True)
+    rts_sorted = sorted(
+        (complex(x) for x in rts), key=lambda z: (z.real, z.imag), reverse=True
+    )
     return rts_sorted
-
