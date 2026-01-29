@@ -54,7 +54,7 @@ def plot_activation_current(
     plt.figure(figsize=(8, 5))
     label_overboost = (
         "Transient Current using overboost"
-        if ub
+        if ub is not None
         else "Transient Current (No Overboost)"
     )
     plt.plot(timestamps, currents_overboost, label=label_overboost, color="b")

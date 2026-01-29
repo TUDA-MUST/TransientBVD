@@ -27,7 +27,7 @@ print(f"  cs = {transducer.cs:.2e} F")
 print(f"  c0 = {transducer.c0:.2e} F")
 
 # If the transducer has an optional parallel resistance (rp)
-if transducer.rp:
+if transducer.rp is not None:
     print(f"  rp = {transducer.rp:.2f} Ω")
 
 # Step 5: Print resonance frequency

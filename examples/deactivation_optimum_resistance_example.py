@@ -1,7 +1,7 @@
 from transientbvd import optimum_resistance, select_transducer
 
 # Step 1: Select a predefined transducer
-selected_name = "SMBLTD45F40H_1"
+selected_name = "SMBLTD45F28H_28kHz"
 transducer = select_transducer(selected_name)
 print(f"Selected Transducer:\n{transducer}\n")
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from transientbvd import select_transducer, deactivation_two_tau
 
 # Step 1: Select a predefined transducer
-selected_name = "SMBLTD45F40H_1"
+selected_name = "SMBLTD45F28H_28kHz"
 transducer = select_transducer(selected_name)
 print(f"Selected Transducer:\n{transducer}\n")
 
@@ -19,7 +19,7 @@ plt.plot(rp_values, decay_times, label="Decay Time (2τ)", linewidth=2)
 plt.xscale("log")
 plt.yscale("log")
 plt.xlabel("Parallel Resistance (Rp) [Ω]")
-plt.ylabel("Decay Time (τ) [s]")
+plt.ylabel("Decay Time (2τ) [s]")
 plt.title("Decay Time vs Parallel Resistance")
 plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 plt.legend()
