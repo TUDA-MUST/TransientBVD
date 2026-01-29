@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"  # caches pip downloads used by pipx too
@@ -31,14 +31,14 @@ jobs:
 
       # Cache the Poetry virtualenv (.venv) based on the lockfile
       - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .venv
           key: ${{ runner.os }}-py3.11-poetry-venv-${{ hashFiles('poetry.lock') }}
 
       # Cache Poetry's own download cache (wheels/sdists)
       - name: Cache Poetry downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/pypoetry

@@ -1,0 +1,30 @@
+version: 2
+
+updates:
+  # Poetry (pyproject.toml + poetry.lock)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    groups:
+      python-deps:
+        patterns:
+          - "*"
+
+  # GitHub Actions (workflow actions versions)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:10"
+      timezone: "Europe/Berlin"
+    labels:
+      - "dependencies"
+      - "ci"
