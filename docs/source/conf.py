@@ -5,14 +5,21 @@
 
 import os
 import sys
+from datetime import datetime
 
 sys.path.insert(0, os.path.abspath("../.."))  # Example: up two levels from docs/
 
 # -- Project information -----------------------------------------------------
 project = "TransientBVD"
 author = "Jan Helge Dörsam"
-copyright = "2024, Jan Helge Dörsam"
-release = "0.1.0"
+copyright = f"{datetime.now().year}, TU Darmstadt - Measurement and Sensor Technology Group"
+
+try:
+    from importlib.metadata import version as _version  # py3.8+
+    release = _version("transientbvd")
+except Exception:
+    release = "0.0.0"
+
 
 # -- General configuration ---------------------------------------------------
 extensions = [
