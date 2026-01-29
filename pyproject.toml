@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "transientbvd"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python library for transient response analysis and optimization using the Butterworth-Van Dyke (BVD) equivalent circuit model."
 authors = [
     "Jan Helge Döersam <jan_helge.doersam@tu-darmstadt.de>",
