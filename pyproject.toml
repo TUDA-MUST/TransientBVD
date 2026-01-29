@@ -9,6 +9,7 @@ authors = [
 maintainers = [
     "Jan Helge Dörsam <jan_helge.doersam@tu-darmstadt.de>"
 ]
+documentation = "https://transientbvd.readthedocs.io/"
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/TUDA-MUST/TransientBVD"
