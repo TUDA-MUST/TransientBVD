@@ -12,6 +12,6 @@ build:
     build:
       html:
         - poetry run sphinx-build -T -b html -d _build/doctrees -D language=en docs/source $READTHEDOCS_OUTPUT/html
-      pdf:
-        - poetry run sphinx-build -T -b latex -d _build/doctrees -D language=en docs/source _build/latex
-        - cd _build/latex && latexmk -pdf && cp *.pdf $READTHEDOCS_OUTPUT/pdf/
+
+sphinx:
+  configuration: docs/source/conf.py
