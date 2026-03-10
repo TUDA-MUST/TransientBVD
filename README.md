@@ -30,9 +30,9 @@ this library supports the research findings presented in:
 
 > **"Rapid Transient Control Strategies for Air-Coupled Ultrasonic Transducers"**
 > 
-> Status: Submitted
+> Status: Accepted
 > 
-> DOI: [10.1234/example](https://doi.org/10.1234/example)  *(Link to be updated upon publication)*
+> DOI: [10.1109/OJUFFC.2026.3673287](10.1109/OJUFFC.2026.3673287)
 
 
 If you find **TransientBVD** helpful in your academic work, please cite:
