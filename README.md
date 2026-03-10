@@ -5,7 +5,7 @@
 ![Pylint](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/pylint.yml/badge.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![DOI](https://img.shields.io/badge/10.1109/OJUFFC.2026.3673287%2Fexample-blue.svg?style=flat-square)](https://doi.org/10.1109/OJUFFC.2026.3673287)
+[![DOI](https://img.shields.io/badge/10.1109/OJUFFC.2026.3673287-blue.svg?style=flat-square)](https://doi.org/10.1109/OJUFFC.2026.3673287)
 
 **TransientBVD** is a Python library for analyzing and optimizing the transient response of ultrasonic transducers (or other resonant systems) modeled by the Butterworth-Van Dyke (BVD) equivalent circuit. It implements advanced methods for both **deactivation** (resistive damping) and **activation** (voltage overboost) strategies, significantly reducing transient response times.
 
