@@ -5,7 +5,7 @@
 ![Pylint](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/pylint.yml/badge.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![DOI](https://img.shields.io/badge/DOI-10.1234%2Fexample-blue.svg?style=flat-square)](https://doi.org/10.1234/example)
+[![DOI](https://img.shields.io/badge/10.1109/OJUFFC.2026.3673287%2Fexample-blue.svg?style=flat-square)](https://doi.org/10.1109/OJUFFC.2026.3673287)
 
 **TransientBVD** is a Python library for analyzing and optimizing the transient response of ultrasonic transducers (or other resonant systems) modeled by the Butterworth-Van Dyke (BVD) equivalent circuit. It implements advanced methods for both **deactivation** (resistive damping) and **activation** (voltage overboost) strategies, significantly reducing transient response times.
 
@@ -42,9 +42,9 @@ If you find **TransientBVD** helpful in your academic work, please cite:
   title     = {Rapid Transient Control Strategies for Air-Coupled Ultrasonic Transducers},
   author    = {Dörsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schrödel, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Sören and Heyl, Christoph M. and Kupnik, Mario},
   journal   = {IEEE Open Journal of Ultrasonics, Ferroelectrics, and Frequency Control},
-  year      = {2025},
+  year      = {2026},
   volume    = {??},
   number    = {??},
   pages     = {??-??},
-  doi       = {10.1234/example},
+  doi       = {10.1109/OJUFFC.2026.3673287},
 }
