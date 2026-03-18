@@ -1,5 +1,5 @@
 # TransientBVD
-[![PyPI](https://img.shields.io/pypi/v/transientbvd.svg?style=flat-square)](https://pypi.python.org/pypi/transientbvd)
+[![PyPI](https://img.shields.io/pypi/v/transientbvd?style=flat-square)](https://pypi.org/project/transientbvd/)
 [![Documentation Status](https://readthedocs.org/projects/transientbvd/badge/?version=latest&style=flat-square)](https://transientbvd.readthedocs.io/en/latest/)
 ![Tests](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/tests.yml/badge.svg)
 ![Pylint](https://github.com/TUDA-MUST/TransientBVD/actions/workflows/pylint.yml/badge.svg)
