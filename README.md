@@ -32,7 +32,7 @@ this library supports the research findings presented in:
 > 
 > Status: Accepted
 > 
-> DOI: [10.1109/OJUFFC.2026.3673287](10.1109/OJUFFC.2026.3673287)
+> DOI: [10.1109/OJUFFC.2026.3673287](https://doi.org/10.1109/OJUFFC.2026.3673287)
 
 
 If you find **TransientBVD** helpful in your academic work, please cite:
