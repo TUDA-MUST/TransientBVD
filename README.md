@@ -30,7 +30,7 @@ this library supports the research findings presented in:
 
 > **"Rapid Transient Control Strategies for Air-Coupled Ultrasonic Transducers"**
 > 
-> Status: Accepted
+> Status: Published
 > 
 > DOI: [10.1109/OJUFFC.2026.3673287](https://doi.org/10.1109/OJUFFC.2026.3673287)
 
@@ -38,13 +38,13 @@ this library supports the research findings presented in:
 If you find **TransientBVD** helpful in your academic work, please cite:
 
 ```bibtex
-@article{doersamTransientBVD2025,
-  title     = {Rapid Transient Control Strategies for Air-Coupled Ultrasonic Transducers},
-  author    = {Dörsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schrödel, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Sören and Heyl, Christoph M. and Kupnik, Mario},
-  journal   = {IEEE Open Journal of Ultrasonics, Ferroelectrics, and Frequency Control},
-  year      = {2026},
-  volume    = {??},
-  number    = {??},
-  pages     = {??-??},
-  doi       = {10.1109/OJUFFC.2026.3673287},
+@article{doersamTransientBVD2026,
+  title   = {Rapid Transient Control Strategies for Air-Coupled Ultrasonic Transducers},
+  author  = {Dörsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schrödel, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Sören and Heyl, Christoph M. and Kupnik, Mario},
+  journal = {IEEE Open Journal of Ultrasonics, Ferroelectrics, and Frequency Control},
+  year    = {2026},
+  month   = mar,
+  volume  = {6},
+  pages   = {68--79},
+  doi     = {10.1109/OJUFFC.2026.3673287},
 }
