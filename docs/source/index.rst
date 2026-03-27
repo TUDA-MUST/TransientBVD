@@ -31,10 +31,10 @@ This repository and library support the research findings presented in:
 
 "Rapid Transient Control Strategies for Ultrasound Transducers"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-:Status: In Preparation
+:Status: Published (March 2026)
 
-.. image:: https://img.shields.io/badge/DOI-10.1234%2Fexample-blue.svg
-   :target: https://doi.org/10.1234/example
+.. image:: https://img.shields.io/badge/DOI-10.1109%2FOJUFFC.2026.3673287-blue.svg
+   :target: https://doi.org/10.1109/OJUFFC.2026.3673287
    :alt: DOI Badge
 
 
@@ -42,15 +42,15 @@ If you find **TransientBVD** helpful in your own research, please cite:
 
 .. code-block:: bibtex
 
-   @article{doersamTransientBVD2024,
-     title   = {Rapid Transient Control Strategies for Ultrasound Transducers},
-     author  = {D{\"o}rsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schr{\"o}del, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, Soeren and Heyl, Christoph and Kupnik, Mario},
-     journal = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
-     year    = {2025},
-     volume  = {??},
-     number  = {??},
-     pages   = {??--??},
-     doi     = {10.1234/example},
+   @article{doersamTransientBVD2026,
+     title   = {Rapid Transient Control Strategies for Air-Coupled Ultrasonic Transducers},
+     author  = {D{\"o}rsam, Jan H. and Suppelt, Sven and Kleber, Carsten and Altmann, Alexander A. and Schr{\"o}del, Yannick and Schmitt, Daniel and Schmitt, Toni and Haugwitz, Christoph and Wismath, Sonja and Soennecken, S{\"o}ren and Heyl, Christoph M. and Kupnik, Mario},
+     journal = {IEEE Open Journal of Ultrasonics, Ferroelectrics, and Frequency Control},
+     year    = {2026},
+     month   = mar,
+     volume  = {6},
+     pages   = {68--79},
+     doi     = {10.1109/OJUFFC.2026.3673287},
    }
 
 Acknowledgements
@@ -58,7 +58,7 @@ Acknowledgements
 This work was supported through multiple grants and collaborations:
 
 - **Carl Zeiss Stiftung** under the CZS Wildcard **SOPHIMA** project.
-- **DFG** under **Grant No. 509096131**.
+- **DFG** under **Grant No. 509096131 and 542327521**.
 - **German Federal Ministry for Economic Affairs and Climate Action** under **Grant No. 03LB3029**.
 - **European Union (Chips Joint Undertaking)** under **Grant No. 101096884** (Listen2Future*)
 
