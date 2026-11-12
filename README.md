@@ -22,6 +22,9 @@
 For detailed usage instructions, examples, and API references, visit the 
 [**TransientBVD Documentation**](https://transientbvd.readthedocs.io/en/latest/).
 
+The library and its unit tests support Python 3.10–3.12. Use Python 3.11 or 3.12
+for the plotting examples, which require Matplotlib and a patched Pillow release.
+
 ## Research Context
 
 Developed at the 
