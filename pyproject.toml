@@ -48,7 +48,8 @@ sphinx-rtd-theme = ">=3.0,<4.0"
 pylint = ">=3.3,<5.0"
 pytest = ">=8.3,<10.0"
 black = ">=25,<27"
-pre-commit = ">=4.1,<5.0"
+pre-commit = { version = ">=4.1,<5.0", python = ">=3.11" }
+filelock = { version = ">=4.2.1,<5.0", python = ">=3.11" }
 myst-parser = ">=4.0,<5.0"
 
 
